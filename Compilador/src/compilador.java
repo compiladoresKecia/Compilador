@@ -9,5 +9,7 @@
  * @author wolvery
  */
 public class compilador {
-    
+    public void compilador(){
+        System.out.println("Alan eh boiola");
+    }
 }
