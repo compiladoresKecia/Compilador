@@ -11,8 +11,8 @@ public class Lexer {
 	
 	public Lexer(InputStream stream){
 		this.stream = stream;
-		reserve(new Word(Tag.TRUE, "true"));
-		reserve(new Word(Tag.FALSE, "false"));
+		//reserve(new Word(Tag.TRUE, "true"));
+		//reserve(new Word(Tag.FALSE, "false"));
 	}
 	
 	private void reserve(Word t){
@@ -75,7 +75,7 @@ public class Lexer {
 				b.append(peek);
 				peek = (char)stream.read();
 			}while(isDotExist == true ? Character.isDigit(peek) : Character.isDigit(peek) || peek == '.');
-			return new Num(new Float(b.toString()));
+			return new Flutuante(new Float(b.toString()));
 		}
 		
 		// handle word
@@ -88,7 +88,7 @@ public class Lexer {
 			String s = b.toString();
 			Word w = words.get(s);
 			if(w == null){
-				w = new Word(Tag.ID, s);
+				w = new Word(s,Tag.ID);
 				words.put(s, w);
 			}
 			return w;
