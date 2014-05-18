@@ -16,4 +16,3 @@ start
 	total = y / x;
 	print ("Total: ";
 	print (total);
-exit
