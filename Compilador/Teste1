@@ -2,7 +2,9 @@ start
 	int a, b;
 	int result;
 	float a,x,total;
-	
+	//TESTE
+	/* DROGA
+	*/
 	a = 2;
 	x = .1;
 	scan (b);

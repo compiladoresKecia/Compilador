@@ -8,18 +8,20 @@ import java.util.*;
 /**
  * Analisador lexico.
  *
- * Whats New * O analisador já reconhece os caracteres do programa To Do *
- * Testar numeros reais * Implementar recuperacao de erro (modo panico ou
+ * Whats New 
+ * O analisador já reconhece os caracteres do programa 
+ * To Do *
+ * Testar numeros reais 
+ * Implementar recuperacao de erro (modo panico ou
  * correcao)
  *
  * @author Alan e Guilherme
  * @version 0.1 Tokens Escritos
  */
-
 public class Lexer {
-
+    
     private int n_linha = 1;     //Numero de linhas do programa     
-    private char ch = ' ';        //Caractere lido do arquivo         
+    private char ch = ' ', chAnterior = ' ';        //Caractere lido do arquivo         
     private Hashtable<String, Word> words = new Hashtable<String, Word>();
     private BaseTXT baseTXT;
 
@@ -58,12 +60,21 @@ public class Lexer {
         words.put(t.lexeme, t);
     }
 
-    // Lê o próximo caractere do arquivo
+    /**
+     * Lê o próximo caractere do arquivo
+     * @throws IOException 
+     */
     private void readch() throws IOException {
         ch = baseTXT.readch();
     }
 
-    // Lê o próximo caractere do arquivo e verifica se é igual a c  
+    //  
+    /**
+     * Lê o próximo caractere do arquivo e verifica se é igual a c. 
+     * @param c
+     * @return Verdadeiro se e´ igual.
+     * @throws IOException 
+     */
     private boolean readch(char c) throws IOException {
         readch();
         if (ch != c) {
@@ -73,9 +84,12 @@ public class Lexer {
         return true;
     }
 
-    // Metodo pra ler os caracteres do arquivo e formar os tokens
-    public Token scan() throws IOException, SyntaxException {
-
+    /**
+     * Desconsidera delimitadores na entrada.
+     *
+     * @throws IOException
+     */
+    private void desconsideraDelimitadores() throws IOException {
         //Desconsidera delimitadores na entrada
         for (;; readch()) {
             if (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\b') {
@@ -86,6 +100,18 @@ public class Lexer {
                 break;
             }
         }
+    }
+
+    /**
+     * Metodo pra ler os caracteres do arquivo e formar os tokens.
+     * @return a token dessa palavra
+     * @throws IOException A resolver.
+     * @throws SyntaxException  A resolver.
+     */
+    public Token scan() throws IOException, SyntaxException {
+
+        //Desconsidera delimitadores na entrada
+        desconsideraDelimitadores();
 
         //Tratar numeros Inteiros e Reais
         if (Character.isDigit(ch)) {
@@ -110,7 +136,7 @@ public class Lexer {
                     readch();
                 } while (Character.isDigit(ch));
 
-                valor = Float.valueOf(numero);
+                valor = Float.parseFloat(numero);
                 //return new Flutuante(valor);
                 Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
                 words.put(String.valueOf(valor), w);
@@ -132,7 +158,7 @@ public class Lexer {
             //Operadores
             case '=':
                 if (readch('=')) {
-                    return Word.atrib;
+                    return Word.eq;
                 } else {
                     return Word.atrib;
                 }
@@ -145,9 +171,10 @@ public class Lexer {
                 }
 
             case '<':
-                if (readch('=')) {
+                readch();
+                if (ch==('=')) {
                     return Word.le;
-                } else if (readch('>')) {
+                } else if (ch==('>')) {
                     return Word.neq;
                 } else {
                     return Word.lt;
@@ -166,8 +193,26 @@ public class Lexer {
                 return Word.mult;
 
             case '/':
-                if (readch('/')) {
-                    return new Token('/');
+                readch();
+                if (ch == ('/')) {
+                    do {
+                        readch();    
+                    }while(ch!='\n');
+                    ch =' ';
+                    return scan();
+                   
+                } else if (ch == ('*')) {
+                    readch();
+                    desconsideraDelimitadores();
+                    chAnterior = ch;
+                    while (chAnterior != '*' && ch != '/') {
+                        chAnterior = ch;                       
+                        desconsideraDelimitadores();
+                        readch();
+                    }
+                    ch = ' ';
+                    return scan();
+
                 } else {
                     ch = ' ';
                     return Word.div;
@@ -193,15 +238,7 @@ public class Lexer {
                 ch = ' ';
                 return Word.fp;
 
-            /*case '/':
-             if (readch('/')) {
-             return new Token('/');
-             }
-             else{
-             ch = ' ';
-             return Word.dv;
-             }
-             */
+            
         } //fim switch
 
         //Tratar textos (LITERAL)
@@ -238,7 +275,6 @@ public class Lexer {
             words.put(s, w);
             return w;
         }
-
         //Caracteres não identificados
         Token t = new Token(ch);
         ch = ' ';
@@ -256,7 +292,6 @@ public class Lexer {
      */
     public void analiseLexica() {
 
-
         try {
             baseTXT.escreverArquivo(("\t*** TOKENS ***\n"), false);
             baseTXT.escreverArquivo(("\nLinha"
@@ -272,13 +307,11 @@ public class Lexer {
                 }
 
                 /**
-                 * outra abordagem pra escrever no arquivo -> envia o formato e as strings. 
-                 *overred: Insere "\n" entre as linhas
+                 * outra abordagem pra escrever no arquivo -> envia o formato e
+                 * as strings. overred: Insere "\n" entre as linhas
                  */
-                
                 //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
                 //String saida =  (n_linha + token.toString() + token.tag) ;
-                
                 if (token.toString().matches("\\d+")
                         && (token.tag != 292 && token.tag != 290)) {
                     String s = token.toString().
@@ -306,20 +339,20 @@ public class Lexer {
         }
 
     }
-/**
- * Grava os identificadores no arquivo LOG.
- */
+
+    /**
+     * Grava os identificadores no arquivo LOG.
+     */
     private void obterIdentificadores() {
-        baseTXT.escreverArquivo("",false);
-        baseTXT.escreverArquivo("\t**Identificadores**",false);
+        baseTXT.escreverArquivo("", false);
+        baseTXT.escreverArquivo("\t**Identificadores**", false);
         for (String chave : words.keySet()) {
             Word palavra = words.get(chave);
             if (palavra.tag == Tag.ID) {
-                baseTXT.escreverArquivo("\t"+  palavra.lexeme,false);
+                baseTXT.escreverArquivo("\t" + palavra.lexeme, false);
             }
         }
-        baseTXT.escreverArquivo("",true);
-        
+        baseTXT.escreverArquivo("", true);
 
     }
 }
