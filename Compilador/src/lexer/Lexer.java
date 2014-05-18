@@ -1,6 +1,7 @@
 package lexer;
 
 //Abrir arquivo
+import carregarArquivo.BaseTXT;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -15,12 +16,10 @@ public class Lexer {
     private char ch = ' ';        //Caractere lido do arquivo         
     private InputStream stream;
     private Hashtable<String, Word> words = new Hashtable<String, Word>();    
-    private FileReader arquivoRAM;  //Arquivo para escrita
-    private FileWriter arquivoWR;  //Arquivo para escrita
-
+    BaseTXT baseTXT;
 
     // Construtor1 (criar o arquivo de leitura e reservar as palavras na tabela de simbolo)
-    public Lexer(FileReader arquivo) {
+    public Lexer(BaseTXT baseTXT) {
         //Insere palavras reservadas na HashTable
         reserve(new Word("start", Tag.START));
         reserve(new Word("exit", Tag.EXIT));
@@ -36,70 +35,10 @@ public class Lexer {
         reserve(new Word("print", Tag.PRINT));
         reserve(new Word("not", Tag.NOT));
         reserve(new Word("and", Tag.AND));
-        reserve(new Word("or", Tag.OR));
-        arquivoRAM = arquivo;
+        reserve(new Word("or", Tag.OR));        
+        this.baseTXT =  baseTXT;
     }
 
-    // Construtor 2 (pra pegar o nome do arquivo)
-    public Lexer() {
-    }
-
-    // Metodo pra ler o arquivo
-    public FileReader abrirArquivo() throws IOException {
-        FileReader arquivoLido= null;  //Arquivo para escrita
-        // desejavel um try catch para o arquivo
-        // Cria um "abridor" de arquivo. 
-        // O caminho é o parâmetro
-        // "." siginifica diretório corrente
-        JFileChooser chooser = new JFileChooser(".");
-        /*
-        FileNameExtensionFilter txtfilter = new FileNameExtensionFilter(
-                "txt files (*.txt)", "txt");
-        chooser.setFileFilter(txtfilter);
-        chooser.setDialogTitle("Open schedule file");
-        // set selected filter
-        chooser.setFileFilter(txtfilter);
-        */
-        //Abre a Janela de Diálogo
-        int flagRead;
-        do {
-            flagRead = chooser.showOpenDialog(null);
-        } while (flagRead != JFileChooser.APPROVE_OPTION);
-        try {
-            arquivoLido = new FileReader(chooser.getSelectedFile());
-        } catch (FileNotFoundException e) {
-            System.err.println("Arquivo não encontrado");
-        }
-        
-
-        //System.out.println("\nArquivo selecionado: " + nomeArquivo +"");
-        //System.out.println("Caminho do Arquivo selecionado: " + caminho + "\n");
-        return arquivoLido;
-        //return caminho;  
-
-    }
-
-    //public String manipularArquivo(){
-    //    String nomeArquivo2;
-    //return nomeArquivo2;}
-    // Metodo para escrever no arquivo
-    public void escreverArquivo(String nomeArquivo, String texto, boolean acabou) {
-
-        try {
-            arquivoWR = new FileWriter((nomeArquivo), true);
-            //WriteFile
-            PrintWriter escreve_linha = new PrintWriter(arquivoWR, true);
-            //escreve_linha.printf("%n" +"  "+ "%s" + "  " + "%n",texto);
-            escreve_linha.println(texto);
-            if (acabou) {
-                escreve_linha.close();
-                System.out.println("acabou de ler! ");
-            }
-        } catch (IOException ex) {
-            System.out.println("\nErro ao tentar escrever no arquivo. -> " + ex);
-        }
-
-    }
 
     // Metodo pra colocar as palavras reservadas na Tabela de Simbolos	
     private void reserve(Word t) {
@@ -108,7 +47,7 @@ public class Lexer {
 
     // Lê o próximo caractere do arquivo
     private void readch() throws IOException {
-        ch = (char) arquivoRAM.read();
+        ch = baseTXT.readch();
     }
 
     // Lê o próximo caractere do arquivo e verifica se é igual a c  
@@ -315,12 +254,13 @@ public class Lexer {
         boolean acabou = false;
 
         try {
-
-            escreverArquivo("LOG", ("\t\t*** TOKENS ***\n" + "\nLinha" + "\tLexema\t\t" + "Valor"), false);
+            baseTXT.escreverArquivo(("\t\t*** TOKENS ***\n" + "\nLinha" 
+                    + "\tLexema\t\t" + "Valor"), false);        
+            
 
             do {
 
-                acabou = !arquivoRAM.ready();
+                acabou = !baseTXT.arquivoLidoPronto();
 
                 Token token = new Token(0);
 
@@ -334,21 +274,24 @@ public class Lexer {
                 //overred: Insere "\n" entre as linhas
                 //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
                 //String saida =  (n_linha + token.toString() + token.tag) ;
-                if (token.toString().matches("\\d+") && (token.tag != 292 && token.tag != 290)) {
-                    String s = token.toString().valueOf(Character.toChars(token.tag));;
+                if (token.toString().matches("\\d+") && 
+                        (token.tag != 292 && token.tag != 290)) {
+                    String s = token.toString().
+                            valueOf(Character.toChars(token.tag));;
                     Character c = s.charAt(0);
                     ErroLexico(c, n_linha);
                     System.out.println("\nAbortando analise lexica ");
                     //System.exit(1); 
                 }
 
-                String saida = ("  " + n_linha + "      " + token.toString() + "\t\t" + token.tag);
-                escreverArquivo("LOG", saida, acabou);
+                String saida = ("  " + n_linha 
+                        + "      " + token.toString() + "\t\t" + token.tag);
+                baseTXT.escreverArquivo(saida, acabou);
 
                     //
                 //MODO PANICO VAI AQUI
                 // 
-            } while (arquivoRAM.ready());
+            } while (baseTXT.arquivoLidoPronto());
 
         } catch (IOException ex) {
 
