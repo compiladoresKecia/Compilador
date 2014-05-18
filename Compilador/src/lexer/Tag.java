@@ -32,16 +32,23 @@ public class Tag {
                 MINUS = 279,    //  -
                 MULT  = 280,    //  *
                 DIV   = 281,    //  /
-                
+                ATRIB = 282,    //  =
+                PT    = 283,    //  .
+                VR    = 284,    //  ,
+                PVR   = 285,    //  ;
+                AP    = 286,    //  (
+                FP    = 288,    //  )
+                AS    = 289,    //  " \" " ASPAS
                 
                 // Outros Tokens
-                INTEIRO   = 285,                
-                LITERAL   = 286,
-                FLUTUANTE = 287,
-		ID        = 288,
-		REL       = 289;    // relacional  
-                //TRUE   = 290,    
-		//FALSE  = 291,    
+                INTEIRO   = 290,                
+                LITERAL   = 291,    // literal, string, texto
+                FLUTUANTE = 292,
+		STRING    = 293,    
+		ID        = 294,    // identificador
+                REL       = 295;    // relacional  
+                //TRUE   = 295,    
+		//FALSE  = 296,    
 		
         
 }

@@ -1,0 +1,6 @@
+start
+	int a, b, c;
+	c = a+b;
+	c = c + 1;
+	print(c);
+exit
