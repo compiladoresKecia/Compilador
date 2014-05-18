@@ -4,14 +4,14 @@ package lexer;
 import carregarArquivo.BaseTXT;
 import java.io.*;
 import java.util.*;
+
 /**
  * Analisador lexico.
- * 
- *  Whats New
- * * O analisador já reconhece os caracteres do programa
- * To Do
- * * Testar numeros reais
- * * Implementar recuperacao de erro (modo panico ou correcao)
+ *
+ * Whats New * O analisador já reconhece os caracteres do programa To Do *
+ * Testar numeros reais * Implementar recuperacao de erro (modo panico ou
+ * correcao)
+ *
  * @author Alan e Guilherme
  * @version 0.1 Tokens Escritos
  */
@@ -20,12 +20,14 @@ public class Lexer {
 
     private int n_linha = 1;     //Numero de linhas do programa     
     private char ch = ' ';        //Caractere lido do arquivo         
-    private Hashtable<String, Word> words = new Hashtable<String, Word>();    
+    private Hashtable<String, Word> words = new Hashtable<String, Word>();
     private BaseTXT baseTXT;
 
     /**
-     * Construtor (criar o arquivo de leitura e reservar as palavras na tabela de simbolo).     
-     * @param baseTXT 
+     * Construtor (criar o arquivo de leitura e reservar as palavras na tabela
+     * de simbolo).
+     *
+     * @param baseTXT
      */
     public Lexer(BaseTXT baseTXT) {
         //Insere palavras reservadas na HashTable
@@ -43,15 +45,15 @@ public class Lexer {
         reserve(new Word("print", Tag.PRINT));
         reserve(new Word("not", Tag.NOT));
         reserve(new Word("and", Tag.AND));
-        reserve(new Word("or", Tag.OR));        
-        this.baseTXT =  baseTXT;
+        reserve(new Word("or", Tag.OR));
+        this.baseTXT = baseTXT;
     }
 
-
     /**
-     *  Metodo pra colocar as palavras reservadas na Tabela de Simbolos.
-     * @param t 
-     */	
+     * Metodo pra colocar as palavras reservadas na Tabela de Simbolos.
+     *
+     * @param t
+     */
     private void reserve(Word t) {
         words.put(t.lexeme, t);
     }
@@ -85,16 +87,6 @@ public class Lexer {
             }
         }
 
-            //Tratar inteiros
-        //Numeros
-            /*if (Character.isDigit(ch)){
-         int value=0;
-         do{
-         value = 10*value + Character.digit(ch,10);
-         readch();
-         }while(Character.isDigit(ch));
-         return new Inteiro(value);
-         }*/
         //Tratar numeros Inteiros e Reais
         if (Character.isDigit(ch)) {
 
@@ -137,7 +129,7 @@ public class Lexer {
         //Tratar terminais
         switch (ch) {
 
-                //Operadores
+            //Operadores
             case '=':
                 if (readch('=')) {
                     return Word.atrib;
@@ -214,7 +206,7 @@ public class Lexer {
 
         //Tratar textos (LITERAL)
         if (ch == '"') {
-                //Stack pilha = new Stack<Character>();
+            //Stack pilha = new Stack<Character>();
             //pilha.push("\"");
             StringBuffer sb = new StringBuffer();
             //do{
@@ -222,7 +214,7 @@ public class Lexer {
                 sb.append(ch);
                 readch();
             } while (ch != '"');
-                //  pilha.pop();
+            //  pilha.pop();
             //}while(!pilha.isEmpty());
             sb.append(ch);
             readch();
@@ -259,20 +251,18 @@ public class Lexer {
         System.out.printf("O caracter \" %c \" não foi reconhecido. ", caracter);
     }
 
-    // Faz a análise léxica propriamente dita, formando os Tokens
+    /**
+     * Faz a análise léxica propriamente dita, formando os Tokens.
+     */
     public void analiseLexica() {
 
-        boolean acabou = false;
 
         try {
-            baseTXT.escreverArquivo(("\t\t*** TOKENS ***\n" + "\nLinha" 
-                    + "\tLexema\t\t" + "Valor"), false);        
-            
+            baseTXT.escreverArquivo(("\t*** TOKENS ***\n"), false);
+            baseTXT.escreverArquivo(("\nLinha"
+                    + "\tLexema\t\t" + "Valor"), false);
 
             do {
-
-                acabou = !baseTXT.arquivoLidoPronto();
-
                 Token token = new Token(0);
 
                 try {
@@ -281,12 +271,16 @@ public class Lexer {
                     System.out.println("Ocorreu um erro ao criar os tokens -> " + ex);
                 }
 
-                    //outra abordagem pra escrever no arquivo -> envia o formato e as strings. 
-                //overred: Insere "\n" entre as linhas
+                /**
+                 * outra abordagem pra escrever no arquivo -> envia o formato e as strings. 
+                 *overred: Insere "\n" entre as linhas
+                 */
+                
                 //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
                 //String saida =  (n_linha + token.toString() + token.tag) ;
-                if (token.toString().matches("\\d+") && 
-                        (token.tag != 292 && token.tag != 290)) {
+                
+                if (token.toString().matches("\\d+")
+                        && (token.tag != 292 && token.tag != 290)) {
                     String s = token.toString().
                             valueOf(Character.toChars(token.tag));;
                     Character c = s.charAt(0);
@@ -295,14 +289,15 @@ public class Lexer {
                     //System.exit(1); 
                 }
 
-                String saida = ("  " + n_linha 
+                String saida = ("  " + n_linha
                         + "      " + token.toString() + "\t\t" + token.tag);
-                baseTXT.escreverArquivo(saida, acabou);
+                baseTXT.escreverArquivo(saida, false);
 
-                    //
+                //
                 //MODO PANICO VAI AQUI
                 // 
             } while (baseTXT.arquivoLidoPronto());
+            obterIdentificadores();
 
         } catch (IOException ex) {
 
@@ -311,6 +306,20 @@ public class Lexer {
         }
 
     }
+/**
+ * Grava os identificadores no arquivo LOG.
+ */
+    private void obterIdentificadores() {
+        baseTXT.escreverArquivo("",false);
+        baseTXT.escreverArquivo("\t**Identificadores**",false);
+        for (String chave : words.keySet()) {
+            Word palavra = words.get(chave);
+            if (palavra.tag == Tag.ID) {
+                baseTXT.escreverArquivo("\t"+  palavra.lexeme,false);
+            }
+        }
+        baseTXT.escreverArquivo("",true);
+        
 
-        // 
+    }
 }

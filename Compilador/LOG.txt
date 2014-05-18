@@ -1,4 +1,5 @@
-		*** TOKENS ***
+	*** TOKENS ***
+
 
 Linha	Lexema		Valor
   1      start		256
@@ -77,3 +78,11 @@ Linha	Lexema		Valor
   16      )		287
   16      ;		285
   17      exit		257
+Identificadores
+	y
+	x
+	result
+	b
+	a
+	total
+
