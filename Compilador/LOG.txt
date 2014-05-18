@@ -24,7 +24,7 @@ Linha	Lexema		Valor
   7      ;		285
   8      x		294
   8      =		282
-  8      =		283
+  8      .		283
   8      1		290
   8      ;		285
   9      scan		264
@@ -77,7 +77,6 @@ Linha	Lexema		Valor
   17      total		294
   17      )		287
   17      ;		285
-  18      exit		257
 
 	**Identificadores**
 	y

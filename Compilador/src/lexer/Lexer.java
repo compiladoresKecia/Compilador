@@ -8,18 +8,16 @@ import java.util.*;
 /**
  * Analisador lexico.
  *
- * Whats New 
- * O analisador já reconhece os caracteres do programa 
- * To Do *
- * Testar numeros reais 
- * Implementar recuperacao de erro (modo panico ou
- * correcao)
+ * Whats New O analisador já reconhece os caracteres do programa To Do * Testar
+ * numeros reais Implementar recuperacao de erro (modo panico ou correcao)
  *
  * @author Alan e Guilherme
  * @version 0.1 Tokens Escritos
+ * @vesion 0.2 correcoes e incrementos dos comentarios
+ * 
  */
 public class Lexer {
-    
+
     private int n_linha = 1;     //Numero de linhas do programa     
     private char ch = ' ', chAnterior = ' ';        //Caractere lido do arquivo         
     private Hashtable<String, Word> words = new Hashtable<String, Word>();
@@ -62,7 +60,8 @@ public class Lexer {
 
     /**
      * Lê o próximo caractere do arquivo
-     * @throws IOException 
+     *
+     * @throws IOException
      */
     private void readch() throws IOException {
         ch = baseTXT.readch();
@@ -70,10 +69,11 @@ public class Lexer {
 
     //  
     /**
-     * Lê o próximo caractere do arquivo e verifica se é igual a c. 
+     * Lê o próximo caractere do arquivo e verifica se é igual a c.
+     *
      * @param c
      * @return Verdadeiro se e´ igual.
-     * @throws IOException 
+     * @throws IOException
      */
     private boolean readch(char c) throws IOException {
         readch();
@@ -104,9 +104,10 @@ public class Lexer {
 
     /**
      * Metodo pra ler os caracteres do arquivo e formar os tokens.
+     *
      * @return a token dessa palavra
      * @throws IOException A resolver.
-     * @throws SyntaxException  A resolver.
+     * @throws SyntaxException A resolver.
      */
     public Token scan() throws IOException, SyntaxException {
 
@@ -172,9 +173,9 @@ public class Lexer {
 
             case '<':
                 readch();
-                if (ch==('=')) {
+                if (ch == ('=')) {
                     return Word.le;
-                } else if (ch==('>')) {
+                } else if (ch == ('>')) {
                     return Word.neq;
                 } else {
                     return Word.lt;
@@ -196,17 +197,17 @@ public class Lexer {
                 readch();
                 if (ch == ('/')) {
                     do {
-                        readch();    
-                    }while(ch!='\n');
-                    ch =' ';
+                        readch();
+                    } while (ch != '\n');
+                    ch = ' ';
                     return scan();
-                   
+
                 } else if (ch == ('*')) {
                     readch();
                     desconsideraDelimitadores();
                     chAnterior = ch;
                     while (chAnterior != '*' && ch != '/') {
-                        chAnterior = ch;                       
+                        chAnterior = ch;
                         desconsideraDelimitadores();
                         readch();
                     }
@@ -238,7 +239,6 @@ public class Lexer {
                 ch = ' ';
                 return Word.fp;
 
-            
         } //fim switch
 
         //Tratar textos (LITERAL)
@@ -282,6 +282,12 @@ public class Lexer {
 
     }
 
+    /**
+     * Erro lexico.
+     *
+     * @param caracter
+     * @param linha
+     */
     public void ErroLexico(Character caracter, int linha) {
         System.out.println("\nErro léxico encontrado na linha " + linha + " !");
         System.out.printf("O caracter \" %c \" não foi reconhecido. ", caracter);
@@ -325,7 +331,6 @@ public class Lexer {
                 String saida = ("  " + n_linha
                         + "      " + token.toString() + "\t\t" + token.getTag());
                 baseTXT.escreverArquivo(saida, false);
-
                 //
                 //MODO PANICO VAI AQUI
                 // 

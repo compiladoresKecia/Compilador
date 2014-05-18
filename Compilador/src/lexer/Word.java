@@ -18,7 +18,7 @@ public class Word extends Token{
     public static final Word mult = new Word ("*", Tag.MULT);
     public static final Word div = new Word ("/", Tag.DIV);
     public static final Word atrib = new Word ("=", Tag.ATRIB);
-    public static final Word pt = new Word ("=", Tag.PT);
+    public static final Word pt = new Word (".", Tag.PT);
     public static final Word vr = new Word (",", Tag.VR);
     public static final Word pvr = new Word (";", Tag.PVR);
     public static final Word ap = new Word ("(", Tag.AP);
