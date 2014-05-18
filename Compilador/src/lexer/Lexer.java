@@ -313,9 +313,9 @@ public class Lexer {
                 //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
                 //String saida =  (n_linha + token.toString() + token.tag) ;
                 if (token.toString().matches("\\d+")
-                        && (token.tag != 292 && token.tag != 290)) {
+                        && (token.getTag() != 292 && token.getTag() != 290)) {
                     String s = token.toString().
-                            valueOf(Character.toChars(token.tag));;
+                            valueOf(Character.toChars(token.getTag()));;
                     Character c = s.charAt(0);
                     ErroLexico(c, n_linha);
                     System.out.println("\nAbortando analise lexica ");
@@ -323,7 +323,7 @@ public class Lexer {
                 }
 
                 String saida = ("  " + n_linha
-                        + "      " + token.toString() + "\t\t" + token.tag);
+                        + "      " + token.toString() + "\t\t" + token.getTag());
                 baseTXT.escreverArquivo(saida, false);
 
                 //
@@ -348,7 +348,7 @@ public class Lexer {
         baseTXT.escreverArquivo("\t**Identificadores**", false);
         for (String chave : words.keySet()) {
             Word palavra = words.get(chave);
-            if (palavra.tag == Tag.ID) {
+            if (palavra.getTag() == Tag.ID) {
                 baseTXT.escreverArquivo("\t" + palavra.lexeme, false);
             }
         }
