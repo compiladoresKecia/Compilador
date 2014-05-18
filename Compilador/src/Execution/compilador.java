@@ -41,9 +41,10 @@ public class compilador {
         Lexer analisadorLexico = new Lexer(arquivo);
         
         analisadorLexico.analiseLexica();
+                
+        System.out.println("\n *** Compilação realizada com sucesso! *** \n");  
         
         
-        System.out.println("\n *** Compilação realizada com sucesso! *** \n");     
     }
 
    

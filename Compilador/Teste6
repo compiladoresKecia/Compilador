@@ -3,4 +3,5 @@ start
 	c = a+b;
 	c = c + 1;
 	print(c);
+	print("Programa terminado. Saindo");
 exit

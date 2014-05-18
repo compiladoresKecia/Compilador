@@ -21,15 +21,19 @@ public class Lexer {
 	private InputStream stream;
 	private Hashtable<String, Word> words = new Hashtable<String, Word>();
 	private File arquivoRO;        //Arquivo somente para leitura 
-        private FileReader arquivoWR;  //Arquivo para escrita
+        private FileReader arquivoRAM;  //Arquivo para escrita
+        private FileWriter arquivoWR;  //Arquivo para escrita
+
+        
         private String nomeArquivo,caminho;
+        
         
         
         // Construtor1 (criar o arquivo de leitura e reservar as palavras na tabela de simbolo)
         public Lexer(String arquivo){
             
             try {
-                      arquivoWR = new FileReader(arquivo);
+                      arquivoRAM = new FileReader(arquivo);
                   } catch (FileNotFoundException e) {
                        System.out.println("Arquivo não encontrado");
                   }
@@ -56,7 +60,14 @@ public class Lexer {
         public Lexer(){            
         }
         
-        
+         public String getNomeArquivo() {
+            return nomeArquivo;
+        }
+
+        public String getCaminho() {
+            return caminho;
+        }
+
         // Metodo pra ler o arquivo
         public String abrirArquivo() throws IOException{
             
@@ -72,13 +83,38 @@ public class Lexer {
                 arquivoRO = chooser.getSelectedFile();
                 caminho = arquivoRO.getPath().toString();
                 nomeArquivo = arquivoRO.getName().toString();                
+                caminho = caminho.replaceAll(nomeArquivo,"");
                 
-                System.out.println("\nArquivo selecionado: " + nomeArquivo +"");
-                System.out.println("Caminho do Arquivo selecionado: " + caminho + "\n");
+                
+                //System.out.println("\nArquivo selecionado: " + nomeArquivo +"");
+                //System.out.println("Caminho do Arquivo selecionado: " + caminho + "\n");
                 
                 return nomeArquivo;  
                 //return caminho;  
                 
+        }
+        
+        
+        //public String manipularArquivo(){
+        //    String nomeArquivo2;
+        //return nomeArquivo2;}
+        
+        // Metodo para escrever no arquivo
+        public void escreverArquivo(String nomeArquivo, String texto, boolean acabou){
+            
+            try {
+                arquivoWR = new FileWriter((nomeArquivo), true);
+                //WriteFile
+                PrintWriter escreve_linha = new PrintWriter(arquivoWR,true);
+                //escreve_linha.printf("%n" +"  "+ "%s" + "  " + "%n",texto);
+                escreve_linha.println(texto);
+                if (acabou){
+                    escreve_linha.close();System.out.println("acabou de ler! ");}
+            } catch (IOException ex) {
+                System.out.println("\nErro ao tentar escrever no arquivo. -> "+ex);
+            }
+            
+            
         }
         
         
@@ -90,7 +126,7 @@ public class Lexer {
         
         // Lê o próximo caractere do arquivo
         private void readch() throws IOException{
-            ch = (char) arquivoWR.read();
+            ch = (char) arquivoRAM.read();
         }
         
         
@@ -287,18 +323,24 @@ public class Lexer {
         
         // Faz a análise léxica propriamente dita, formando os Tokens
         public void analiseLexica(){
+             boolean acabou = false;
             try {
+                escreverArquivo("LOG",("\t\t*** TOKENS ***\n"+"\nLinha"+"\tLexema\t\t"+"Valor"),false);
                 do{
-                    
+                    acabou = !arquivoRAM.ready();
                     Token token = new Token(0);
                     try {
                         token = scan();
                     } catch (SyntaxException ex) {
                         System.out.println("Ocorreu um erro ao criar os tokens -> "+ex);
                     }
-                    System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
+                    //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
+                    //String saida =  (n_linha + token.toString() + token.tag) ;
+                    String saida =  ("  "+n_linha +"      "+ token.toString() +"\t\t"+ token.tag) ;
+                    //saida = saida.replaceAll("\n","");
+                    escreverArquivo("LOG",saida,acabou);
                     
-                }while(arquivoWR.ready());
+                }while(arquivoRAM.ready());
             } catch (IOException ex) {
                 System.out.println("Ocorreu um erro ao ler o arquivo. -> "+ex);
             }
