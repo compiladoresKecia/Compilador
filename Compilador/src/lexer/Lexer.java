@@ -4,21 +4,29 @@ package lexer;
 import carregarArquivo.BaseTXT;
 import java.io.*;
 import java.util.*;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
+/**
+ * Analisador lexico.
+ * 
+ *  Whats New
+ * * O analisador já reconhece os caracteres do programa
+ * To Do
+ * * Testar numeros reais
+ * * Implementar recuperacao de erro (modo panico ou correcao)
+ * @author Alan e Guilherme
+ * @version 0.1 Tokens Escritos
+ */
 
 public class Lexer {
 
     private int n_linha = 1;     //Numero de linhas do programa     
     private char ch = ' ';        //Caractere lido do arquivo         
-    private InputStream stream;
     private Hashtable<String, Word> words = new Hashtable<String, Word>();    
-    BaseTXT baseTXT;
+    private BaseTXT baseTXT;
 
-    // Construtor1 (criar o arquivo de leitura e reservar as palavras na tabela de simbolo)
+    /**
+     * Construtor (criar o arquivo de leitura e reservar as palavras na tabela de simbolo).     
+     * @param baseTXT 
+     */
     public Lexer(BaseTXT baseTXT) {
         //Insere palavras reservadas na HashTable
         reserve(new Word("start", Tag.START));
@@ -40,7 +48,10 @@ public class Lexer {
     }
 
 
-    // Metodo pra colocar as palavras reservadas na Tabela de Simbolos	
+    /**
+     *  Metodo pra colocar as palavras reservadas na Tabela de Simbolos.
+     * @param t 
+     */	
     private void reserve(Word t) {
         words.put(t.lexeme, t);
     }

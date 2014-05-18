@@ -33,7 +33,7 @@ public class BaseTXT {
     public BaseTXT() {
         this.arquivoLido = abrirArquivo();
         try {
-            arquivoGravar = new FileWriter("LOG", true);
+            arquivoGravar = new FileWriter("LOG.txt", true);
         } catch (IOException ex) {
             Logger.getLogger(BaseTXT.class.getName()).log(Level.SEVERE, null, ex);
         }
