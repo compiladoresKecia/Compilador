@@ -19,6 +19,9 @@ public class Tag {
                 NOT    = 266,
                 OR     = 267,
                 AND    = 268,
+                INT    = 269,
+                FLOAT  = 270,
+                STRING = 271,
 
                 //Operadores e pontuação
                 
@@ -37,18 +40,18 @@ public class Tag {
                 VR    = 284,    //  ,
                 PVR   = 285,    //  ;
                 AP    = 286,    //  (
-                FP    = 288,    //  )
-                AS    = 289,    //  " \" " ASPAS
+                FP    = 287,    //  )
+                AS    = 288,    //  " \" " ASPAS
                 
                 // Outros Tokens
                 INTEIRO   = 290,                
                 LITERAL   = 291,    // literal, string, texto
                 FLUTUANTE = 292,
-		STRING    = 293,    
+		//STRING    = 293,    
 		ID        = 294,    // identificador
                 REL       = 295;    // relacional  
-                //TRUE   = 295,    
-		//FALSE  = 296,    
+                //TRUE   = 296,    
+		//FALSE  = 297,    
 		
         
 }

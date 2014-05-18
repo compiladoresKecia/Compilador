@@ -41,8 +41,8 @@ public class Lexer {
             //Insere palavras reservadas na HashTable
             reserve(new Word("start", Tag.START));
             reserve(new Word("exit", Tag.EXIT));
-            reserve(new Word("int", Tag.INTEIRO));
-            reserve(new Word("float", Tag.FLUTUANTE));
+            reserve(new Word("int", Tag.INT));
+            reserve(new Word("float", Tag.FLOAT));
             reserve(new Word("string", Tag.STRING));            
             reserve(new Word("if", Tag.IF));
             reserve(new Word("then", Tag.THEN));
@@ -190,11 +190,18 @@ public class Lexer {
                     } while (Character.isDigit(ch));
 
                     valor = Float.valueOf(numero);                
-                    return new Flutuante(valor);
+                    //return new Flutuante(valor);
+                    Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
+                    words.put(String.valueOf(valor), w);
+                    return w;
 
                 } else {
-                    value = Integer.parseInt(numero); 
-                    return new Inteiro(value);
+                    value = Integer.parseInt(numero);
+                    //return new Inteiro(value);
+                    Word w = new Word(String.valueOf(value), Tag.INTEIRO);
+                    words.put(String.valueOf(value), w);
+                    return w;
+                    
                 }        
             }   
             
@@ -283,11 +290,16 @@ public class Lexer {
             
             //Tratar textos (LITERAL)
             if (ch == '"'){
+                //Stack pilha = new Stack<Character>();
+                //pilha.push("\"");
                 StringBuffer sb = new StringBuffer();
-                do{
-                    sb.append(ch);
-                    readch();
-                }while(ch!='"');
+                //do{
+                    do{
+                        sb.append(ch);
+                        readch();
+                    }while(ch!='"');
+                //  pilha.pop();
+                //}while(!pilha.isEmpty());
                 sb.append(ch);
                 readch();
                 String s = sb.toString();
@@ -320,32 +332,61 @@ public class Lexer {
             
 	}
         
+        public void ErroLexico(Character caracter, int linha ){
+            System.out.println("\nErro léxico encontrado na linha "+linha+" !");
+            System.out.printf("O caracter \" %c \" não foi reconhecido. ",caracter);
+        }
         
         // Faz a análise léxica propriamente dita, formando os Tokens
         public void analiseLexica(){
-             boolean acabou = false;
+            
+            boolean acabou = false;
+            
             try {
+                
                 escreverArquivo("LOG",("\t\t*** TOKENS ***\n"+"\nLinha"+"\tLexema\t\t"+"Valor"),false);
+                
                 do{
+                    
                     acabou = !arquivoRAM.ready();
+                    
                     Token token = new Token(0);
+                    
                     try {
                         token = scan();
                     } catch (SyntaxException ex) {
                         System.out.println("Ocorreu um erro ao criar os tokens -> "+ex);
                     }
+                    
+                    //outra abordagem pra escrever no arquivo -> envia o formato e as strings. 
+                    //overred: Insere "\n" entre as linhas
                     //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
                     //String saida =  (n_linha + token.toString() + token.tag) ;
-                    String saida =  ("  "+n_linha +"      "+ token.toString() +"\t\t"+ token.tag) ;
-                    //saida = saida.replaceAll("\n","");
+                    
+                    if (token.toString().matches("\\d+") && (token.tag != 292 && token.tag!=290)){
+                        String s = token.toString().valueOf(Character.toChars(token.tag));;
+                        Character c = s.charAt(0);                    
+                        ErroLexico(c, n_linha);
+                        System.out.println("\nAbortando analise lexica ");
+                        //System.exit(1); 
+                    }
+                    
+                    String saida =  ("  "+n_linha +"      "+ token.toString() +"\t\t"+ token.tag) ;                    
                     escreverArquivo("LOG",saida,acabou);
                     
+                    //
+                    //MODO PANICO VAI AQUI
+                    // 
+                    
                 }while(arquivoRAM.ready());
+                
             } catch (IOException ex) {
+                
                 System.out.println("Ocorreu um erro ao ler o arquivo. -> "+ex);
+                
             }
          
-            
+        
         }
         
         
