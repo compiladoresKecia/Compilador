@@ -28,12 +28,19 @@ public class Word extends Token{
        
     //public static final Word True = new Word ("true", Tag.TRUE);
     //public static final Word False = new Word ("false", Tag.FALSE);
-    
+    /**
+     * Construtor do token.
+     * @param s
+     * @param tag 
+     */
         public Word(String s, int tag ){
 		super(tag);
 		lexeme = new String(s);
 	}
-        
+        /**
+         * Obtem o lexema.
+         * @return 
+         */
         public String toString(){
             return "" + lexeme;
         }       

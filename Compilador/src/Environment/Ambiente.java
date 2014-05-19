@@ -91,7 +91,10 @@ public class Ambiente {
         }
         return null;
     }
-    
+    /**
+     * Obtem um set dos words.
+     * @return 
+     */
     public Set<Word> gerarHashMap(){
         return table.keySet();
     }

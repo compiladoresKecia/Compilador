@@ -18,7 +18,12 @@ import lexer.SyntaxException;
  */
 
 public class Compilador {
-   
+   /**
+    * Execucao principal.
+    * @param args
+    * @throws IOException
+    * @throws SyntaxException 
+    */
     public static void main(String[] args) throws IOException, SyntaxException {  
         BaseTXT baseTXT =  new BaseTXT();
         if (baseTXT.arquivoLidoPronto()){
