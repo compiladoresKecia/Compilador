@@ -85,4 +85,16 @@ Linha	Lexema		Valor
 	total
 	result
 	x
+	**Identificadores**
+start
+int
+int
+float
+scan
+scan
+print
+print
+print
+print
+print
 

@@ -28,8 +28,10 @@ public class Lexer {
     private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
     private BaseTXT baseTXT;
     private Ambiente ambiente;
-    private Identificador idVazio = new Identificador(0);
-
+    private Identificador idVazio ;
+    private ArrayList<Integer> palavrasReservadas;
+    //Tokens que sao uma palavra reservada
+    private ArrayList<Token> tokenPalavraReservada;
     /**
      * Construtor (criar o arquivo de leitura e reservar as palavras na tabela
      * de simbolo).
@@ -38,6 +40,9 @@ public class Lexer {
      */
     public Lexer(BaseTXT baseTXT) {
         this.ambiente = new Ambiente(null);
+        this.idVazio = new Identificador(0);
+        palavrasReservadas = new ArrayList<>() ;
+        tokenPalavraReservada = new ArrayList<>() ;
         //Insere palavras reservadas na HashTable
         inserirPalavrasReservadas();
         this.baseTXT = baseTXT;
@@ -62,6 +67,21 @@ public class Lexer {
         reserve(new Word("not", Tag.NOT));
         reserve(new Word("and", Tag.AND));
         reserve(new Word("or", Tag.OR));
+        palavrasReservadas.add((Tag.START));
+        palavrasReservadas.add((Tag.EXIT));
+        palavrasReservadas.add((Tag.INT));
+        palavrasReservadas.add((Tag.FLOAT));
+        palavrasReservadas.add((Tag.STRING));
+        palavrasReservadas.add((Tag.IF));
+        palavrasReservadas.add((Tag.THEN));
+        palavrasReservadas.add((Tag.ELSE));
+        palavrasReservadas.add((Tag.END));
+        palavrasReservadas.add((Tag.WHILE));
+        palavrasReservadas.add((Tag.SCAN));
+        palavrasReservadas.add((Tag.PRINT));
+        palavrasReservadas.add((Tag.NOT));
+        palavrasReservadas.add((Tag.AND));
+        palavrasReservadas.add((Tag.OR));
     }
 
     /**
@@ -391,7 +411,9 @@ public class Lexer {
                     System.out.println("\nAbortando analise lexica ");
                     //System.exit(1); 
                 }
-
+                if (palavrasReservadas.contains(token.getTag())){
+                    tokenPalavraReservada.add(token);
+                }
                 String saida = ("  " + n_linha
                         + "      " + token.toString() + "\t\t" + token.getTag());
                 baseTXT.escreverArquivo(saida, false);
@@ -423,7 +445,12 @@ public class Lexer {
                 baseTXT.escreverArquivo("\t" + palavra.lexeme, false);
             }
         }
+        baseTXT.escreverArquivo("\t**Palavras Reservadas**", false);
+        while(!tokenPalavraReservada.isEmpty()){
+            baseTXT.escreverArquivo("\t"+tokenPalavraReservada.remove(0).toString(), false);
+        }
         baseTXT.escreverArquivo("", true);
-
+       
     }
+    
 }
