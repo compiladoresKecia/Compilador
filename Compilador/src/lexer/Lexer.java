@@ -1,6 +1,8 @@
 package lexer;
 
 //Abrir arquivo
+import Environment.Ambiente;
+import Environment.id.Identificador;
 import carregarArquivo.BaseTXT;
 import java.io.*;
 import java.util.*;
@@ -8,20 +10,25 @@ import java.util.*;
 /**
  * Analisador lexico.
  *
- * Whats New O analisador já reconhece os caracteres do programa To Do * Testar
- * numeros reais Implementar recuperacao de erro (modo panico ou correcao)
+ * Whats New 
+ * 
+ * 
+ * To Do
+ * Tratar Excecoes
  *
  * @author Alan e Guilherme
  * @version 0.1 Tokens Escritos
  * @vesion 0.2 correcoes e incrementos dos comentarios
- * 
+ * @version 0.3 adicionada o objeto ambiente, foi dado um identificado vazio
+ *
  */
 public class Lexer {
 
     private int n_linha = 1;     //Numero de linhas do programa     
-    private char ch = ' ', chAnterior = ' ';        //Caractere lido do arquivo         
-    private Hashtable<String, Word> words = new Hashtable<String, Word>();
+    private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
     private BaseTXT baseTXT;
+    private Ambiente ambiente;
+    private Identificador idVazio = new Identificador(0);
 
     /**
      * Construtor (criar o arquivo de leitura e reservar as palavras na tabela
@@ -30,7 +37,16 @@ public class Lexer {
      * @param baseTXT
      */
     public Lexer(BaseTXT baseTXT) {
+        this.ambiente = new Ambiente(null);
         //Insere palavras reservadas na HashTable
+        inserirPalavrasReservadas();
+        this.baseTXT = baseTXT;
+    }
+
+    /**
+     * Insere palavras reservadas na HashTable.
+     */
+    private void inserirPalavrasReservadas() {
         reserve(new Word("start", Tag.START));
         reserve(new Word("exit", Tag.EXIT));
         reserve(new Word("int", Tag.INT));
@@ -46,7 +62,6 @@ public class Lexer {
         reserve(new Word("not", Tag.NOT));
         reserve(new Word("and", Tag.AND));
         reserve(new Word("or", Tag.OR));
-        this.baseTXT = baseTXT;
     }
 
     /**
@@ -55,7 +70,7 @@ public class Lexer {
      * @param t
      */
     private void reserve(Word t) {
-        words.put(t.lexeme, t);
+        ambiente.put(t, idVazio);
     }
 
     /**
@@ -103,57 +118,70 @@ public class Lexer {
     }
 
     /**
-     * Metodo pra ler os caracteres do arquivo e formar os tokens.
+     * Tratar numeros Inteiros e Reais.
      *
-     * @return a token dessa palavra
-     * @throws IOException A resolver.
-     * @throws SyntaxException A resolver.
+     * @return
+     * @throws IOException
      */
-    public Token scan() throws IOException, SyntaxException {
+    public Token tratarNumeros() throws IOException {
+        float valor;
+        String numero = "";
+        int value = 0;
 
-        //Desconsidera delimitadores na entrada
-        desconsideraDelimitadores();
-
-        //Tratar numeros Inteiros e Reais
-        if (Character.isDigit(ch)) {
-
-            float valor;
-            String numero = "";
-            int value = 0;
-
-            while (Character.isDigit(ch)) {
-                if (Character.isDigit(ch)) {
-                    numero += ch;
-                }
-                readch();
-            }
-
-            if (ch == '.') {
+        while (Character.isDigit(ch)) {
+            if (Character.isDigit(ch)) {
                 numero += ch;
-                readch();
-
-                do {
-                    numero += ch;
-                    readch();
-                } while (Character.isDigit(ch));
-
-                valor = Float.parseFloat(numero);
-                //return new Flutuante(valor);
-                Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
-                words.put(String.valueOf(valor), w);
-                return w;
-
-            } else {
-                value = Integer.parseInt(numero);
-                //return new Inteiro(value);
-                Word w = new Word(String.valueOf(value), Tag.INTEIRO);
-                words.put(String.valueOf(value), w);
-                return w;
-
             }
+            readch();
         }
 
-        //Tratar terminais
+        if (ch == '.') {
+            numero += ch;
+            readch();
+
+            do {
+                numero += ch;
+                readch();
+            } while (Character.isDigit(ch));
+
+            valor = Float.parseFloat(numero);
+            //return new Flutuante(valor);
+            Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
+            ambiente.put( w,idVazio);
+            return w;
+
+        } else {
+            value = Integer.parseInt(numero);
+            //return new Inteiro(value);
+            Word w = new Word(String.valueOf(value), Tag.INTEIRO);
+            ambiente.put( w,idVazio);
+            return w;
+
+        }
+
+    }
+
+    /**
+     * Caracteres não identificados em toda analise.
+     *
+     * @return
+     */
+
+    public Token caracterNaoIdentificado() {
+        //Caracteres não identificados
+        Token t = new Token(ch);
+        ch = ' ';
+        return t;
+    }
+
+    /**
+     * Tratar terminais.
+     *
+     * @return
+     * @throws IOException
+     * @throws SyntaxException
+     */
+    public Token tratarTerminal() throws IOException, SyntaxException {
         switch (ch) {
 
             //Operadores
@@ -238,47 +266,84 @@ public class Lexer {
             case ')':
                 ch = ' ';
                 return Word.fp;
-
+            default:
+                return caracterNaoIdentificado();
         } //fim switch
+    }
+
+    /**
+     * Tratar textos (LITERAL).
+     *
+     * @return
+     * @throws IOException
+     */
+    public Token tratarLiteral() throws IOException {
+        //Stack pilha = new Stack<Character>();
+        //pilha.push("\"");
+        StringBuffer sb = new StringBuffer();
+        //do{
+        do {
+            sb.append(ch);
+            readch();
+        } while (ch != '"');
+        //  pilha.pop();
+        //}while(!pilha.isEmpty());
+        sb.append(ch);
+        readch();
+        String s = sb.toString();
+        return new Word(s, Tag.LITERAL);
+    }
+
+    /**
+     * Tratar os Identificadores.
+     *
+     * @return
+     * @throws IOException
+     */
+    public Token tratarIdentificador() throws IOException {
+        StringBuffer sb = new StringBuffer();
+        do {
+            sb.append(ch);
+            readch();
+        } while (Character.isLetterOrDigit(ch));
+        String s = sb.toString();
+        Word w = ambiente.getPeloLexema(s);
+        if (w != null) {
+            return w; //palavra já existe na HashTable
+        }
+        w = new Word(s, Tag.ID);
+        ambiente.put(w,idVazio);
+        return w;
+    }
+
+    /**
+     * Metodo pra ler os caracteres do arquivo e formar os tokens.
+     *
+     * @return a token dessa palavra
+     * @throws IOException A resolver.
+     * @throws SyntaxException A resolver.
+     */
+    public Token scan() throws IOException, SyntaxException {
+
+        //Desconsidera delimitadores na entrada
+        desconsideraDelimitadores();
+
+        //Tratar numeros Inteiros e Reais
+        if (Character.isDigit(ch)) {
+            return tratarNumeros();
+        }
 
         //Tratar textos (LITERAL)
         if (ch == '"') {
-            //Stack pilha = new Stack<Character>();
-            //pilha.push("\"");
-            StringBuffer sb = new StringBuffer();
-            //do{
-            do {
-                sb.append(ch);
-                readch();
-            } while (ch != '"');
-            //  pilha.pop();
-            //}while(!pilha.isEmpty());
-            sb.append(ch);
-            readch();
-            String s = sb.toString();
-            return new Word(s, Tag.LITERAL);
+            return tratarLiteral();
         }
 
         //Tratar os Identificadores
         if (Character.isLetter(ch)) {
-            StringBuffer sb = new StringBuffer();
-            do {
-                sb.append(ch);
-                readch();
-            } while (Character.isLetterOrDigit(ch));
-            String s = sb.toString();
-            Word w = (Word) words.get(s);
-            if (w != null) {
-                return w; //palavra já existe na HashTable
-            }
-            w = new Word(s, Tag.ID);
-            words.put(s, w);
-            return w;
+            return tratarIdentificador();
         }
-        //Caracteres não identificados
-        Token t = new Token(ch);
-        ch = ' ';
-        return t;
+        //Tratar terminais
+        return tratarTerminal();
 
     }
 
@@ -297,7 +362,6 @@ public class Lexer {
      * Faz a análise léxica propriamente dita, formando os Tokens.
      */
     public void analiseLexica() {
-
         try {
             baseTXT.escreverArquivo(("\t*** TOKENS ***\n"), false);
             baseTXT.escreverArquivo(("\nLinha"
@@ -351,8 +415,10 @@ public class Lexer {
     private void obterIdentificadores() {
         baseTXT.escreverArquivo("", false);
         baseTXT.escreverArquivo("\t**Identificadores**", false);
-        for (String chave : words.keySet()) {
-            Word palavra = words.get(chave);
+        Set<Word> words = ambiente.gerarHashMap();
+        Iterator<Word> iterator = words.iterator();
+        while (iterator.hasNext()) {
+            Word palavra = iterator.next();
             if (palavra.getTag() == Tag.ID) {
                 baseTXT.escreverArquivo("\t" + palavra.lexeme, false);
             }

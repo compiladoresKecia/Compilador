@@ -79,10 +79,10 @@ Linha	Lexema		Valor
   17      ;		285
 
 	**Identificadores**
-	y
-	x
-	result
-	b
 	a
+	b
+	y
 	total
+	result
+	x
 
