@@ -10,17 +10,17 @@ import java.util.*;
 /**
  * Analisador lexico.
  *
- * Whats New 
- * 
- * 
- * To Do
- * Tratar Excecoes
+ * Whats New
+ *
+ *
+ * To Do Tratar Excecoes
  *
  * @author Alan e Guilherme
  * @version 0.1 Tokens Escritos
  * @vesion 0.2 correcoes e incrementos dos comentarios
  * @version 0.3 adicionada o objeto ambiente, foi dado um identificado vazio
- *
+ * @version 0.4 excecoes adicionadas
+ * 
  */
 public class Lexer {
 
@@ -28,10 +28,14 @@ public class Lexer {
     private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
     private BaseTXT baseTXT;
     private Ambiente ambiente;
-    private Identificador idVazio ;
+    private Identificador idVazio;
     private ArrayList<Integer> palavrasReservadas;
     //Tokens que sao uma palavra reservada
     private ArrayList<Token> tokenPalavraReservada;
+    private ArrayList<String> listaDeErros;
+    private final static String COMENTARIO = "COMENTARIO";
+    private final static String LITERAL = "LITERAL";
+
     /**
      * Construtor (criar o arquivo de leitura e reservar as palavras na tabela
      * de simbolo).
@@ -41,8 +45,9 @@ public class Lexer {
     public Lexer(BaseTXT baseTXT) {
         this.ambiente = new Ambiente(null);
         this.idVazio = new Identificador(0);
-        palavrasReservadas = new ArrayList<>() ;
-        tokenPalavraReservada = new ArrayList<>() ;
+        listaDeErros = new ArrayList<>();
+        palavrasReservadas = new ArrayList<>();
+        tokenPalavraReservada = new ArrayList<>();
         //Insere palavras reservadas na HashTable
         inserirPalavrasReservadas();
         this.baseTXT = baseTXT;
@@ -167,14 +172,14 @@ public class Lexer {
             valor = Float.parseFloat(numero);
             //return new Flutuante(valor);
             Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
-            ambiente.put( w,idVazio);
+            ambiente.put(w, idVazio);
             return w;
 
         } else {
             value = Integer.parseInt(numero);
             //return new Inteiro(value);
             Word w = new Word(String.valueOf(value), Tag.INTEIRO);
-            ambiente.put( w,idVazio);
+            ambiente.put(w, idVazio);
             return w;
 
         }
@@ -186,7 +191,6 @@ public class Lexer {
      *
      * @return
      */
-
     public Token caracterNaoIdentificado() {
         //Caracteres não identificados
         Token t = new Token(ch);
@@ -258,6 +262,9 @@ public class Lexer {
                         chAnterior = ch;
                         desconsideraDelimitadores();
                         readch();
+                        if (!baseTXT.arquivoLidoPronto()) {
+                            throw new SyntaxException(COMENTARIO);
+                        }
                     }
                     ch = ' ';
                     return scan();
@@ -297,17 +304,16 @@ public class Lexer {
      * @return
      * @throws IOException
      */
-    public Token tratarLiteral() throws IOException {
-        //Stack pilha = new Stack<Character>();
-        //pilha.push("\"");
+    public Token tratarLiteral() throws IOException, SyntaxException {
         StringBuffer sb = new StringBuffer();
-        //do{
+
         do {
             sb.append(ch);
             readch();
+            if (!baseTXT.arquivoLidoPronto()) {
+                throw new SyntaxException(LITERAL);
+            }
         } while (ch != '"');
-        //  pilha.pop();
-        //}while(!pilha.isEmpty());
         sb.append(ch);
         readch();
         String s = sb.toString();
@@ -332,7 +338,7 @@ public class Lexer {
             return w; //palavra já existe na HashTable
         }
         w = new Word(s, Tag.ID);
-        ambiente.put(w,idVazio);
+        ambiente.put(w, idVazio);
         return w;
     }
 
@@ -373,9 +379,21 @@ public class Lexer {
      * @param caracter
      * @param linha
      */
-    public void ErroLexico(Character caracter, int linha) {
-        System.out.println("\nErro léxico encontrado na linha " + linha + " !");
-        System.out.printf("O caracter \" %c \" não foi reconhecido. ", caracter);
+    public void erroLexico(Character caracter, int linha) {
+        listaDeErros.add("O caracter " + caracter + " na linha :" + linha + " não foi reconhecido. ");
+    }
+
+    /**
+     * Erro comentario.
+     */
+    public void erroComentario() {
+        listaDeErros.add("O comentario nao foi devidamente encerrado");
+    }
+    /**
+     * Erro da String.
+     */
+    public void erroLiteral(){
+        listaDeErros.add("O literal nao foi devidamente encerrado");
     }
 
     /**
@@ -392,34 +410,30 @@ public class Lexer {
 
                 try {
                     token = scan();
+                    if (token.toString().matches("\\d+")
+                            && (token.getTag() != Tag.FLUTUANTE && token.getTag() != Tag.INTEIRO)) {
+                        String s = token.toString().
+                                valueOf(Character.toChars(token.getTag()));;
+                        Character c = s.charAt(0);
+                        erroLexico(c, n_linha);
+
+                    }
+
+                    if (palavrasReservadas.contains(token.getTag())) {
+                        tokenPalavraReservada.add(token);
+                    }
+                    String saida = ("  " + n_linha
+                            + "      " + token.toString() + "\t\t" + token.getTag());
+                    baseTXT.escreverArquivo(saida, false);
                 } catch (SyntaxException ex) {
-                    System.out.println("Ocorreu um erro ao criar os tokens -> " + ex);
+                    if (ex.getMessage().equals(COMENTARIO)) {
+                        erroComentario();
+                    }
+                    else if(ex.getMessage().equals(LITERAL)) {
+                        erroLiteral();
+                    }
                 }
 
-                /**
-                 * outra abordagem pra escrever no arquivo -> envia o formato e
-                 * as strings. overred: Insere "\n" entre as linhas
-                 */
-                //System.out.printf("%d\t%s\t%d\n", n_linha, token.toString(),token.tag);                    
-                //String saida =  (n_linha + token.toString() + token.tag) ;
-                if (token.toString().matches("\\d+")
-                        && (token.getTag() != 292 && token.getTag() != 290)) {
-                    String s = token.toString().
-                            valueOf(Character.toChars(token.getTag()));;
-                    Character c = s.charAt(0);
-                    ErroLexico(c, n_linha);
-                    System.out.println("\nAbortando analise lexica ");
-                    //System.exit(1); 
-                }
-                if (palavrasReservadas.contains(token.getTag())){
-                    tokenPalavraReservada.add(token);
-                }
-                String saida = ("  " + n_linha
-                        + "      " + token.toString() + "\t\t" + token.getTag());
-                baseTXT.escreverArquivo(saida, false);
-                //
-                //MODO PANICO VAI AQUI
-                // 
             } while (baseTXT.arquivoLidoPronto());
             obterIdentificadores();
 
@@ -442,15 +456,20 @@ public class Lexer {
         while (iterator.hasNext()) {
             Word palavra = iterator.next();
             if (palavra.getTag() == Tag.ID) {
-                baseTXT.escreverArquivo("\t" + palavra.lexeme, false);
+                baseTXT.escreverArquivo(" " + palavra.lexeme, false);
             }
         }
         baseTXT.escreverArquivo("\t**Palavras Reservadas**", false);
-        while(!tokenPalavraReservada.isEmpty()){
-            baseTXT.escreverArquivo("\t"+tokenPalavraReservada.remove(0).toString(), false);
+        while (!tokenPalavraReservada.isEmpty()) {
+            baseTXT.escreverArquivo(" " + tokenPalavraReservada.remove(0).toString(), false);
         }
+        baseTXT.escreverArquivo("\t**Erros**", false);
+        while (!listaDeErros.isEmpty()) {
+            baseTXT.escreverArquivo("\t" + listaDeErros.remove(0).toString(), false);
+        }
+
         baseTXT.escreverArquivo("", true);
-       
+
     }
-    
+
 }

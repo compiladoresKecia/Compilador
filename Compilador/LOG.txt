@@ -7,94 +7,116 @@ Linha	Lexema		Valor
   2      a		294
   2      ,		284
   2      b		294
+  2      ,		284
+  2      c		294
+  2      ,		284
+  2      maior		294
+  2      ,		284
+  2      outro		294
   2      ;		285
-  3      int		269
-  3      result		294
-  3      ;		285
-  4      float		270
-  4      a		294
-  4      ,		284
-  4      x		294
-  4      ,		284
-  4      total		294
-  4      ;		285
-  7      a		294
-  7      =		282
-  7      2		290
+  4      do		294
+  5      print		265
+  5      (		286
+  5      "A"		291
+  5      )		287
+  5      ;		285
+  6      scan		264
+  6      (		286
+  6      a		294
+  6      )		287
+  6      ;		285
+  7      print		265
+  7      (		286
+  7      "B"		291
+  7      )		287
   7      ;		285
-  8      x		294
-  8      =		282
-  8      .		283
-  8      1		290
+  8      scan		264
+  8      (		286
+  8      b		294
+  8      )		287
   8      ;		285
-  9      scan		264
+  9      print		265
   9      (		286
-  9      b		294
+  9      "C"		291
   9      )		287
   9      ;		285
   10      scan		264
   10      (		286
-  10      y		294
+  10      c		294
   10      )		287
-  11      result		294
-  11      =		282
-  11      (		286
-  11      a		294
-  11      *		280
-  11      b		294
-  11      +		278
-  11      +		278
-  11      1		290
-  11      )		287
-  11      /		281
-  11      2		290
-  11      ;		285
-  12      print		265
-  12      "Resultado: "		291
-  12      ;		285
-  13      print		265
-  13      (		286
-  13      result		294
-  13      )		287
-  13      ;		285
-  14      print		265
-  14      (		286
-  14      "Total: "		291
-  14      )		287
-  14      ;		285
-  15      total		294
-  15      =		282
-  15      y		294
-  15      /		281
-  15      x		294
-  15      ;		285
-  16      print		265
+  10      ;		285
+  12      if		258
+  12      (		286
+  12      (		286
+  12      a		294
+  12      >		273
+  12      b		294
+  12      )		287
+  12      and		268
+  12      (		286
+  12      a		294
+  12      >		273
+  12      c		294
+  12      )		287
+  12      )		287
+  13      maior		294
+  13      =		282
+  13      a		294
+  15      else		260
+  16      if		258
   16      (		286
-  16      "Total: "		291
-  16      ;		285
-  17      print		265
-  17      (		286
-  17      total		294
-  17      )		287
+  16      b		294
+  16      >		273
+  16      c		294
+  16      )		287
+  16      then		259
+  17      maior		294
+  17      =		282
+  17      b		294
   17      ;		285
+  19      else		260
+  20      maior		294
+  20      =		282
+  20      c		294
+  20      ;		285
+  21      end		261
+  22      end		261
+  23      print		265
+  23      (		286
+  23      "Maior valor:"		291
+  23      ");
+		print (maior);
+		print ("		291
+  23      Outro		294
+  23      63		63
 
 	**Identificadores**
-	a
-	b
-	y
-	total
-	result
-	x
-	**Identificadores**
-start
-int
-int
-float
-scan
-scan
-print
-print
-print
-print
-print
+ Outro
+ maior
+ outro
+ b
+ c
+ do
+ a
+	**Palavras Reservadas**
+ start
+ int
+ print
+ scan
+ print
+ scan
+ print
+ scan
+ if
+ and
+ else
+ if
+ then
+ else
+ end
+ end
+ print
+	**Erros**
+	O caracter ? na linha :23 não foi reconhecido. 
+	O literal nao foi devidamente encerrado
 
