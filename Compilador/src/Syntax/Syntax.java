@@ -130,8 +130,7 @@ public class Syntax {
 
     private void declListAUX() {
         if (token.getTag() == Tag.PVR) {
-            eat(Tag.PVR);
-            decl();
+            eat(Tag.PVR);            
             declList();
         }
     }
