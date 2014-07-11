@@ -6,22 +6,38 @@ import lexer.SyntaxException;
 import lexer.Tag;
 import lexer.Token;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
+ * Syntax Criado.
  *
- * @author wolvery
+ * @author Guilherme e Alan Goncalves
+ * @version 0.1 Syntax Finalizado.
+ * @deprecated ERROR a ser aprimorado.
+ *
  */
 public class Syntax {
 
+    /**
+     * Lexer para a analise sintatica.
+     */
     Lexer lexer;
+    /**
+     * Token carregado pelo lexer.
+     */
     Token token = null;
+    /**
+     * COMENTARIO.
+     */
     private final static String COMENTARIO = "COMENTARIO";
+    /**
+     * LITERAL.
+     */
     private final static String LITERAL = "LITERAL";
 
+    /**
+     * Construtor do sintatico.
+     *
+     * @param lexer
+     */
     public Syntax(Lexer lexer) {
         this.lexer = lexer;
         try {
@@ -39,22 +55,9 @@ public class Syntax {
         }
     }
 
-    private boolean match(int tag) {
-        if (token.getTag() == tag) {
-            return true;
-        }
-        return false;
-    }
-
-    private void eatWithMatch(int tag) {
-        if (match(tag)) {
-            eat(tag);
-        } else {
-            advance();
-            erro();
-        }
-    }
-
+    /**
+     * Gera o proximo token.
+     */
     private void advance() {
         try {
             token = lexer.scan();
@@ -71,6 +74,9 @@ public class Syntax {
         }
     }
 
+    /**
+     * Gera o erro.
+     */
     private void erro() {
         try {
             System.out.println("Erro Sintático na linha " + lexer.scan() + " próximo ao Token " + token.toString());
@@ -89,6 +95,11 @@ public class Syntax {
 
     }
 
+    /**
+     * Elimina o tag e := um novo. Se estiver incorreto gera erro.
+     *
+     * @param tag
+     */
     private void eat(int tag) {
         if (token.getTag() == tag) {
             System.out.println("eat " + token);
@@ -102,7 +113,9 @@ public class Syntax {
         program();
     }
 
-    // program -> "program" identifier body
+    /**
+     * program := START declist body END.
+     */
     private void program() {
         switch (token.getTag()) {
             case Tag.START:
@@ -117,7 +130,9 @@ public class Syntax {
         }
     }
 
-    // declList1 -> decl declList
+    /**
+     * declList := decl declListAUX.
+     */
     private void declList() {
         switch (token.getTag()) {
             case Tag.INT:
@@ -129,7 +144,9 @@ public class Syntax {
         }
     }
 
-    // decl -> type identList1
+    /**
+     * decl := type identList.
+     */
     private void decl() {
         switch (token.getTag()) {
             case Tag.INT:
@@ -144,6 +161,9 @@ public class Syntax {
         }
     }
 
+    /**
+     * declListAUX := type declList.
+     */
     private void declListAUX() {
         if (token.getTag() == Tag.PVR) {
             eat(Tag.PVR);
@@ -151,7 +171,9 @@ public class Syntax {
         }
     }
 
-    // identList1 -> identifier identList
+    /**
+     * identList := identifier identListAUX.
+     */
     private void identList() {
         switch (token.getTag()) {
             case Tag.ID:
@@ -164,7 +186,9 @@ public class Syntax {
         }
     }
 
-    // identList -> , identifier identList | lambda
+    /**
+     * identList := identifier identList | lambda.
+     */
     private void identListAUX() {
         if (token.getTag() == Tag.VR) {
             eat(Tag.VR);
@@ -173,7 +197,9 @@ public class Syntax {
         }
     }
 
-    // type -> "int" | "char"
+    /**
+     *  type := "int" | "char".
+     */
     private void type() {
         switch (token.getTag()) {
             case Tag.INT:
@@ -192,8 +218,9 @@ public class Syntax {
                 erro();
         }
     }
-
-    // identifier -> id
+    /**
+     *  identifier := id.
+     */
     private void identifier() {
         switch (token.getTag()) {
             case Tag.ID:
@@ -204,15 +231,16 @@ public class Syntax {
                 erro();
         }
     }
-
-    // stmtList1 -> stmt stmtList
+/**  
+     *  stmtList := stmt stmtListAUX.
+     */
     private void stmtList() {
         switch (token.getTag()) {
             case Tag.ID:
             case Tag.SCAN:
             case Tag.PRINT:
                 stmt();
-                eatWithMatch(Tag.PVR);
+                eat(Tag.PVR);
                 stmtListAUX();
                 break;
             case Tag.IF:
@@ -226,12 +254,15 @@ public class Syntax {
                 erro();
         }
     }
-
+/**  
+     *  stmtListAUX := stmt stmtList.
+     */
     private void stmtListAUX() {
         stmtList();
     }
-
-    // stmt -> assignStmt | ifStmt | whileStmt | readStmt | writeStmt
+/**  
+     *  stmt := assignStmt | ifStmt | whileStmt | readStmt | writeStmt.
+     */
     private void stmt() {
         switch (token.getTag()) {
             case Tag.ID:
@@ -261,13 +292,14 @@ public class Syntax {
                 erro();
         }
     }
-
-    // assignStmt -> identifier = simpleExpr
+    /**  
+     *  assignStmt := identifier = simpleExpr.
+     */
     private void assignStmt() {
         switch (token.getTag()) {
             case Tag.ID:
                 eat(Tag.ID);
-                eatWithMatch(Tag.EQ);
+                eat(Tag.EQ);
                 simpleExpr1();
                 break;
 
@@ -275,38 +307,42 @@ public class Syntax {
                 erro();
         }
     }
-
-    // ifStmt1 -> if ( condition ) { stmtList1 } ifStmt
+    /**  
+     *  ifStmt := if condition stmtList elseStmt.
+     */
     private void ifStmt() {
         switch (token.getTag()) {
             case Tag.IF:
                 eat(Tag.IF);
                 condition();
-                eatWithMatch(Tag.THEN);
+                eat(Tag.THEN);
                 stmtList();
                 elseStmt();
-                eatWithMatch(Tag.END);
+                eat(Tag.END);
                 break;
 
             default:
                 erro();
         }
     }
-
-    // ifStmt -> else { stmtList1 } | lambda
+/**  
+     *  elseStmt :=  stmtList | lambda.
+     */
     private void elseStmt() {
         if (token.getTag() == Tag.ELSE) {
             eat(Tag.ELSE);
             stmtList();
         }
     }
-
-    // condition -> expression
+    /**  
+     *  condition :=  expression.
+     */
     private void condition() {
         expression1();
     }
-
-    // whileStmt -> stmtPrefix { stmtList1 }
+    /**  
+     *  whileStmt :=  stmtList1 stmtSufix.
+     */
     private void whileStmt() {
         switch (token.getTag()) {
             case Tag.DO:
@@ -318,172 +354,167 @@ public class Syntax {
                 erro();
         }
     }
-
-    // stmtPrefix -> while ( condition )
+    /**  
+     *  stmtSufix :=  condition.
+     */
     private void stmtSufix() {
         switch (token.getTag()) {
             case Tag.WHILE:
                 eat(Tag.WHILE);
                 condition();
-                eatWithMatch(Tag.END);
+                eat(Tag.END);
                 break;
 
             default:
                 erro();
         }
     }
-
-    // readStmt -> read identifier
+    /**  
+     *  readStmt :=  identifier.
+     */
     private void readStmt() {
         switch (token.getTag()) {
             case Tag.SCAN:
                 eat(Tag.SCAN);
-                eatWithMatch(Tag.AP);
+                eat(Tag.AP);
                 identifier();
-                eatWithMatch(Tag.FP);
+                eat(Tag.FP);
                 break;
 
             default:
                 erro();
         }
     }
-
-    // writeStmt -> write writable
+    /**  
+     *  writeStmt :=  writable.
+     */
     private void writeStmt() {
         switch (token.getTag()) {
             case Tag.PRINT:
                 eat(Tag.PRINT);
-                eatWithMatch(Tag.AP);
+                eat(Tag.AP);
                 writable();
-                eatWithMatch(Tag.FP);
+                eat(Tag.FP);
                 break;
 
             default:
                 erro();
         }
     }
-    
-    // writable -> simpleExpr1 | literal
-    private void writable() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  writable := simpleExpr1 | literal.
+     */
+    private void writable() {
+        switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
             case Tag.FLOAT:
                 simpleExpr1();
                 break;
-            
+
             case Tag.LITERAL:
                 eat(Tag.LITERAL);
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // expression1 -> simpleExpr1 expression
-    private void expression1() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  expression1 := simpleExpr1 expression.
+     */
+    private void expression1() {
+        switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
             case Tag.FLOAT:
             case Tag.LITERAL:
-            case Tag.AP:               
+            case Tag.AP:
             case Tag.NOT:
             case Tag.MINUS:
                 simpleExpr1();
                 expression();
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // expression -> relop simpleExpr1 | lambda
-    private void expression() 
-    {
-        if(token.getTag() == Tag.EQ || token.getTag() == Tag.GT || token.getTag() == Tag.GE ||
-        token.getTag() == Tag.LT || token.getTag() == Tag.LE || token.getTag() == Tag.NEQ)
-        {
+    /**  
+     *  expression1 := relop simpleExpr1 | lambda.
+     */
+    private void expression() {
+        if (token.getTag() == Tag.EQ || token.getTag() == Tag.GT || token.getTag() == Tag.GE
+                || token.getTag() == Tag.LT || token.getTag() == Tag.LE || token.getTag() == Tag.NEQ) {
             relop();
             simpleExpr1();
         }
     }
-    
-    // simpleExpr1 -> term1 simpleExpr
-    private void simpleExpr1() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  simpleExpr1 := term1 simpleExpr.
+     */
+    private void simpleExpr1() {
+        switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
             case Tag.FLOAT:
-            case Tag.LITERAL:    
-            case Tag.AP:               
+            case Tag.LITERAL:
+            case Tag.AP:
             case Tag.NOT:
             case Tag.MINUS:
                 term1();
                 simpleExpr();
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // simpleExpr -> + | - | or | lambda
-    private void simpleExpr() 
-    {
-        if(token.getTag() == Tag.PLUS || token.getTag() == Tag.MINUS || token.getTag() == Tag.OR)
-        {
+    /**  
+     *  simpleExpr := + | - | or | lambda.
+     */
+    private void simpleExpr() {
+        if (token.getTag() == Tag.PLUS || token.getTag() == Tag.MINUS || token.getTag() == Tag.OR) {
             addop();
             term1();
             simpleExpr();
         }
     }
-    
-    // term1 -> factorA term
-    private void term1() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  term1 := factorA term.
+     */
+    private void term1() {
+        switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
             case Tag.FLOAT:
             case Tag.LITERAL:
-            case Tag.AP:               
+            case Tag.AP:
             case Tag.NOT:
             case Tag.MINUS:
                 factorA();
                 term();
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // term -> mulop factorA term | lambda
-    private void term() 
-    {
-        if(token.getTag() == Tag.MULT || token.getTag() == Tag.DIV || token.getTag() == Tag.AND)
-        {
+    /**  
+     *  term := mulop factorA term | lambda.
+     */
+    private void term() {
+        if (token.getTag() == Tag.MULT || token.getTag() == Tag.DIV || token.getTag() == Tag.AND) {
             mulop();
             factorA();
             term();
         }
     }
-    
-    // factorA -> factor | not factor | - factor
-    private void factorA() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  factorA := factor | not factor | - factor.
+     */
+    private void factorA() {
+        switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
             case Tag.FLOAT:
@@ -491,136 +522,140 @@ public class Syntax {
             case Tag.AP:
                 factor();
                 break;
-                
+
             case Tag.NOT:
                 eat(Tag.NOT);
                 factor();
                 break;
-                
+
             case Tag.MINUS:
                 eat(Tag.MINUS);
                 factor();
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // factor -> identifier | constant | ( expression1 )
-    private void factor() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  factor := identifier | constant | ( expression1 ).
+     */
+    private void factor() {
+        switch (token.getTag()) {
             case Tag.ID:
                 eat(Tag.ID);
                 break;
-            
+
             case Tag.INTEIRO:
+            case Tag.FLOAT:
             case Tag.LITERAL:
                 constant();
                 break;
-                
+
             case Tag.AP:
                 eat(Tag.AP);
                 expression1();
                 eat(Tag.FP);
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    private void relop() 
-    {
-        switch(token.getTag())
-        {
+    /**  
+     *  relop := == | < | <= | > | >= | <>.
+     */
+    private void relop() {
+        switch (token.getTag()) {
             case Tag.EQ:
                 eat(Tag.EQ);
                 break;
-            
+
             case Tag.GT:
                 eat(Tag.GT);
                 break;
-                
+
             case Tag.GE:
                 eat(Tag.GE);
                 break;
-                
+
             case Tag.LT:
                 eat(Tag.LT);
                 break;
-                
+
             case Tag.LE:
                 eat(Tag.LE);
                 break;
-                
+
             case Tag.NEQ:
                 eat(Tag.NEQ);
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    private void addop() 
-    {
-        switch(token.getTag())
-        {
+    /**
+     *  addop := + | - | or | lambda.
+     */
+    private void addop() {
+        switch (token.getTag()) {
             case Tag.PLUS:
                 eat(Tag.PLUS);
                 break;
-            
+
             case Tag.MINUS:
                 eat(Tag.MINUS);
                 break;
-                
+
             case Tag.OR:
                 eat(Tag.OR);
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // mulop -> * | / | and
-    private void mulop() 
-    {
-        switch(token.getTag())
-        {
+
+    /**
+     *  mulop := * | / | and.
+     */
+    private void mulop() {
+        switch (token.getTag()) {
             case Tag.MULT:
                 eat(Tag.MULT);
                 break;
-            
+
             case Tag.DIV:
                 eat(Tag.DIV);
                 break;
-                
+
             case Tag.AND:
                 eat(Tag.AND);
                 break;
-                
+
             default:
                 erro();
         }
     }
-    
-    // constant -> intConst | charConst
-    private void constant() 
-    {
-        switch(token.getTag())
-        {       
+
+    /**
+     * constant := intConst | charConst.
+     */
+    private void constant() {
+        switch (token.getTag()) {
             case Tag.INTEIRO:
                 eat(Tag.INTEIRO);
                 break;
-                
+
             case Tag.LITERAL:
                 eat(Tag.LITERAL);
                 break;
                 
+            case Tag.FLOAT:
+                eat(Tag.FLOAT);
+                break;
+
             default:
                 erro();
         }
