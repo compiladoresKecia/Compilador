@@ -20,19 +20,19 @@ import java.util.*;
  * @vesion 0.2 correcoes e incrementos dos comentarios
  * @version 0.3 adicionada o objeto ambiente, foi dado um identificado vazio
  * @version 0.4 excecoes adicionadas
- * 
+ *
  */
 public class Lexer {
 
     private int n_linha = 1;     //Numero de linhas do programa     
     private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
-    private BaseTXT baseTXT;
-    private Ambiente ambiente;
-    private Identificador idVazio;
-    private ArrayList<Integer> palavrasReservadas;
+    private final BaseTXT baseTXT;
+    private final Ambiente ambiente;
+    private final Identificador idVazio;
+    private final ArrayList<Integer> palavrasReservadas;
     //Tokens que sao uma palavra reservada
-    private ArrayList<Token> tokenPalavraReservada;
-    private ArrayList<String> listaDeErros;
+    private final ArrayList<Token> tokenPalavraReservada;
+    private final ArrayList<String> listaDeErros;
     private final static String COMENTARIO = "COMENTARIO";
     private final static String LITERAL = "LITERAL";
 
@@ -122,6 +122,15 @@ public class Lexer {
         }
         ch = ' ';
         return true;
+    }
+
+    /**
+     * Obter a linha correspodente a execucao.
+     *
+     * @return
+     */
+    public int getN_linha() {
+        return n_linha;
     }
 
     /**
@@ -389,11 +398,22 @@ public class Lexer {
     public void erroComentario() {
         listaDeErros.add("O comentario nao foi devidamente encerrado");
     }
+
     /**
      * Erro da String.
      */
-    public void erroLiteral(){
+    public void erroLiteral() {
         listaDeErros.add("O literal nao foi devidamente encerrado");
+    }
+
+    public boolean arquivoPronto() {
+        try {
+            return baseTXT.arquivoLidoPronto();
+        } catch (IOException e) {
+            System.out.println("Ocorreu um erro ao ler o arquivo. -> " + e);
+        }
+        return false;
+
     }
 
     /**
@@ -428,8 +448,7 @@ public class Lexer {
                 } catch (SyntaxException ex) {
                     if (ex.getMessage().equals(COMENTARIO)) {
                         erroComentario();
-                    }
-                    else if(ex.getMessage().equals(LITERAL)) {
+                    } else if (ex.getMessage().equals(LITERAL)) {
                         erroLiteral();
                     }
                 }
@@ -470,6 +489,10 @@ public class Lexer {
 
         baseTXT.escreverArquivo("", true);
 
+    }
+    
+    public void gravarSintatico(StringBuffer stBuffer){
+        baseTXT.escreverArquivoSintatico(stBuffer);
     }
 
 }

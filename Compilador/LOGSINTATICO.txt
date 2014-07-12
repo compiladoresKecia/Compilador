@@ -1,0 +1,20 @@
+Erro Sintático na linha 8 próximo ao Token .
+Erro Sintático na linha 8 próximo ao Token .
+Token esperado: 285 
+Erro Sintático na linha 11 próximo ao Token result
+Token esperado: 285 
+Erro Sintático na linha 12 próximo ao Token "Resultado: "
+Token esperado: 286 
+Erro Sintático na linha 13 próximo ao Token print
+Erro Sintático na linha 13 próximo ao Token print
+Token esperado: 287 
+Erro Sintático na linha 13 próximo ao Token )
+Token esperado: 285 
+Erro Sintático na linha 16 próximo ao Token ;
+Token esperado: 287 
+Erro Sintático na linha 17 próximo ao Token )
+Token esperado: 285 
+Erro Sintático na linha 17 próximo ao Token 65535
+Erro Sintático na linha 17 próximo ao Token 65535
+Token esperado: 257 
+

@@ -11,7 +11,6 @@ import lexer.Token;
  *
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
- * @deprecated ERROR a ser aprimorado.
  *
  */
 public class Syntax {
@@ -32,6 +31,10 @@ public class Syntax {
      * LITERAL.
      */
     private final static String LITERAL = "LITERAL";
+    /**
+     * StringBuffer relativo a gravacao.
+     */
+    private StringBuffer strBuffer;
 
     /**
      * Construtor do sintatico.
@@ -39,6 +42,7 @@ public class Syntax {
      * @param lexer
      */
     public Syntax(Lexer lexer) {
+        this.strBuffer = new StringBuffer();
         this.lexer = lexer;
         try {
             token = lexer.scan();
@@ -60,16 +64,16 @@ public class Syntax {
      */
     private void advance() {
         try {
-            token = lexer.scan();
+                token = lexer.scan();
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
+                
             } else if (ex.getMessage().equals(LITERAL)) {
                 lexer.erroLiteral();
             }
         } catch (IOException ex) {
-
-            System.out.println("Ocorreu um erro ao ler o arquivo. ");
+            System.out.println("Ocorreu um erro ao ler o arquivo.");
 
         }
     }
@@ -78,21 +82,30 @@ public class Syntax {
      * Gera o erro.
      */
     private void erro() {
-        try {
-            System.out.println("Erro Sintático na linha " + lexer.scan() + " próximo ao Token " + token.toString());
-        } catch (SyntaxException ex) {
-            if (ex.getMessage().equals(COMENTARIO)) {
-                lexer.erroComentario();
-            } else if (ex.getMessage().equals(LITERAL)) {
-                lexer.erroLiteral();
-            }
-        } catch (IOException ex) {
+        String erro = "Erro Sintático na linha " + lexer.getN_linha()
+                + " próximo ao Token " + token.toString() + "\n";
+        System.out.println(erro);
+        strBuffer.append(erro);
+    }
 
-            System.out.println("Ocorreu um erro ao ler o arquivo. ");
-
+    /**
+     * Tratar erro pelo modo panico.
+     *
+     * @param tag
+     */
+    private void tratarErro(int tag) {
+        strBuffer.append("Token esperado: " + tag + " \n");      
+        System.out.println("LOOOP: Token esperado: " + tag +" Tokens:");
+        do{
+            
+            advance();
+            System.out.println(token.getTag());
+        }while(token.getTag()!=tag && lexer.arquivoPronto()  &&
+                token.getTag()!=Tag.PVR);
+        if(token.getTag()==Tag.PVR){
+           eat(Tag.PVR); 
         }
-        System.exit(0);
-
+       
     }
 
     /**
@@ -105,12 +118,16 @@ public class Syntax {
             System.out.println("eat " + token);
             advance();
         } else {
-            erro();
+            erro(); 
+            System.out.println(" Tag a ser comido: "+ tag +"\n");
+            tratarErro(tag);
+                     
         }
     }
 
-    private void analisar() {
+    public void analisar() {
         program();
+        lexer.gravarSintatico(strBuffer);
     }
 
     /**
@@ -187,18 +204,18 @@ public class Syntax {
     }
 
     /**
-     * identList := identifier identList | lambda.
+     * identList := identList | lambda.
      */
     private void identListAUX() {
+        System.out.print((token.getTag() == Tag.VR) + "\n");
         if (token.getTag() == Tag.VR) {
             eat(Tag.VR);
-            identifier();
             identList();
         }
     }
 
     /**
-     *  type := "int" | "char".
+     * type := "int" | "char".
      */
     private void type() {
         switch (token.getTag()) {
@@ -218,8 +235,9 @@ public class Syntax {
                 erro();
         }
     }
+
     /**
-     *  identifier := id.
+     * identifier := id.
      */
     private void identifier() {
         switch (token.getTag()) {
@@ -231,8 +249,9 @@ public class Syntax {
                 erro();
         }
     }
-/**  
-     *  stmtList := stmt stmtListAUX.
+
+    /**
+     * stmtList := stmt stmtListAUX.
      */
     private void stmtList() {
         switch (token.getTag()) {
@@ -254,14 +273,16 @@ public class Syntax {
                 erro();
         }
     }
-/**  
-     *  stmtListAUX := stmt stmtList.
+
+    /**
+     * stmtListAUX := stmt stmtList.
      */
     private void stmtListAUX() {
         stmtList();
     }
-/**  
-     *  stmt := assignStmt | ifStmt | whileStmt | readStmt | writeStmt.
+
+    /**
+     * stmt := assignStmt | ifStmt | whileStmt | readStmt | writeStmt.
      */
     private void stmt() {
         switch (token.getTag()) {
@@ -292,14 +313,15 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  assignStmt := identifier = simpleExpr.
+
+    /**
+     * assignStmt := identifier = simpleExpr.
      */
     private void assignStmt() {
         switch (token.getTag()) {
             case Tag.ID:
                 eat(Tag.ID);
-                eat(Tag.EQ);
+                eat(Tag.ATRIB);
                 simpleExpr1();
                 break;
 
@@ -307,8 +329,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  ifStmt := if condition stmtList elseStmt.
+
+    /**
+     * ifStmt := if condition stmtList elseStmt.
      */
     private void ifStmt() {
         switch (token.getTag()) {
@@ -325,8 +348,9 @@ public class Syntax {
                 erro();
         }
     }
-/**  
-     *  elseStmt :=  stmtList | lambda.
+
+    /**
+     * elseStmt := stmtList | lambda.
      */
     private void elseStmt() {
         if (token.getTag() == Tag.ELSE) {
@@ -334,14 +358,16 @@ public class Syntax {
             stmtList();
         }
     }
-    /**  
-     *  condition :=  expression.
+
+    /**
+     * condition := expression.
      */
     private void condition() {
         expression1();
     }
-    /**  
-     *  whileStmt :=  stmtList1 stmtSufix.
+
+    /**
+     * whileStmt := stmtList1 stmtSufix.
      */
     private void whileStmt() {
         switch (token.getTag()) {
@@ -354,8 +380,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  stmtSufix :=  condition.
+
+    /**
+     * stmtSufix := condition.
      */
     private void stmtSufix() {
         switch (token.getTag()) {
@@ -369,8 +396,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  readStmt :=  identifier.
+
+    /**
+     * readStmt := identifier.
      */
     private void readStmt() {
         switch (token.getTag()) {
@@ -385,8 +413,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  writeStmt :=  writable.
+
+    /**
+     * writeStmt := writable.
      */
     private void writeStmt() {
         switch (token.getTag()) {
@@ -401,8 +430,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  writable := simpleExpr1 | literal.
+
+    /**
+     * writable := simpleExpr1 | literal.
      */
     private void writable() {
         switch (token.getTag()) {
@@ -420,8 +450,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  expression1 := simpleExpr1 expression.
+
+    /**
+     * expression1 := simpleExpr1 expression.
      */
     private void expression1() {
         switch (token.getTag()) {
@@ -440,8 +471,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  expression1 := relop simpleExpr1 | lambda.
+
+    /**
+     * expression1 := relop simpleExpr1 | lambda.
      */
     private void expression() {
         if (token.getTag() == Tag.EQ || token.getTag() == Tag.GT || token.getTag() == Tag.GE
@@ -450,8 +482,9 @@ public class Syntax {
             simpleExpr1();
         }
     }
-    /**  
-     *  simpleExpr1 := term1 simpleExpr.
+
+    /**
+     * simpleExpr1 := term1 simpleExpr.
      */
     private void simpleExpr1() {
         switch (token.getTag()) {
@@ -470,8 +503,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  simpleExpr := + | - | or | lambda.
+
+    /**
+     * simpleExpr := + | - | or | lambda.
      */
     private void simpleExpr() {
         if (token.getTag() == Tag.PLUS || token.getTag() == Tag.MINUS || token.getTag() == Tag.OR) {
@@ -480,8 +514,9 @@ public class Syntax {
             simpleExpr();
         }
     }
-    /**  
-     *  term1 := factorA term.
+
+    /**
+     * term1 := factorA term.
      */
     private void term1() {
         switch (token.getTag()) {
@@ -500,8 +535,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  term := mulop factorA term | lambda.
+
+    /**
+     * term := mulop factorA term | lambda.
      */
     private void term() {
         if (token.getTag() == Tag.MULT || token.getTag() == Tag.DIV || token.getTag() == Tag.AND) {
@@ -510,8 +546,9 @@ public class Syntax {
             term();
         }
     }
-    /**  
-     *  factorA := factor | not factor | - factor.
+
+    /**
+     * factorA := factor | not factor | - factor.
      */
     private void factorA() {
         switch (token.getTag()) {
@@ -537,8 +574,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  factor := identifier | constant | ( expression1 ).
+
+    /**
+     * factor := identifier | constant | ( expression1 ).
      */
     private void factor() {
         switch (token.getTag()) {
@@ -562,8 +600,9 @@ public class Syntax {
                 erro();
         }
     }
-    /**  
-     *  relop := == | < | <= | > | >= | <>.
+
+    /**
+     * relop := == | < | <= | > | >= | <>.
      */
     private void relop() {
         switch (token.getTag()) {
@@ -595,8 +634,9 @@ public class Syntax {
                 erro();
         }
     }
+
     /**
-     *  addop := + | - | or | lambda.
+     * addop := + | - | or | lambda.
      */
     private void addop() {
         switch (token.getTag()) {
@@ -618,7 +658,7 @@ public class Syntax {
     }
 
     /**
-     *  mulop := * | / | and.
+     * mulop := * | / | and.
      */
     private void mulop() {
         switch (token.getTag()) {
@@ -651,7 +691,7 @@ public class Syntax {
             case Tag.LITERAL:
                 eat(Tag.LITERAL);
                 break;
-                
+
             case Tag.FLOAT:
                 eat(Tag.FLOAT);
                 break;

@@ -6,6 +6,7 @@ package Execution;
  * and open the template in the editor.
  */
 
+import Syntax.Syntax;
 import carregarArquivo.BaseTXT;
 import java.io.IOException;
 import lexer.Lexer;
@@ -26,9 +27,15 @@ public class Compilador {
     */
     public static void main(String[] args) throws IOException, SyntaxException {  
         BaseTXT baseTXT =  new BaseTXT();
+        Syntax syntax;
         if (baseTXT.arquivoLidoPronto()){
-            Lexer lexer = new Lexer(baseTXT);
+            Lexer lexer = new Lexer(baseTXT);            
             lexer.analiseLexica();
+            //Reload arquivo e abre um novo lexer.
+            baseTXT.reload();
+            lexer = new Lexer(baseTXT);
+            syntax = new Syntax(lexer);
+            syntax.analisar();
             System.out.println(
                     "\n *** Compilação realizada com sucesso! *** \n");  
         }else{

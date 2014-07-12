@@ -22,18 +22,29 @@ import javax.swing.JFileChooser;
 public class BaseTXT {
 
     /**
-     * Arquivo para escrita
+     * Chooser para reuso.
+     */
+    // O caminho é o parâmetro
+    // "." siginifica diretório corrente
+    JFileChooser chooser = new JFileChooser(".");
+    /**
+     * Arquivo para escrita.
      */
     private FileReader arquivoLido;
     /**
-     * Arquivo para gravacao
+     * Arquivo para gravacao.
      */
     private FileWriter arquivoGravar;
+    /**
+     * Arquivo para gravacao Sintatico.
+     */
+    private FileWriter arquivoGravarSintatico;
 
     public BaseTXT() {
         this.arquivoLido = abrirArquivo();
         try {
-            arquivoGravar = new FileWriter("LOG.txt", false);
+            arquivoGravar = new FileWriter("LOGSEMANTICO.txt", false);
+            arquivoGravarSintatico = new FileWriter("LOGSINTATICO.txt", false);
         } catch (IOException ex) {
             Logger.getLogger(BaseTXT.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -45,12 +56,9 @@ public class BaseTXT {
      * @return FileReader
      */
     private FileReader abrirArquivo() {
-        
+
         // desejavel um try catch para o arquivo
         // Cria um "abridor" de arquivo. 
-        // O caminho é o parâmetro
-        // "." siginifica diretório corrente
-        JFileChooser chooser = new JFileChooser(".");
         /*
          FileNameExtensionFilter txtfilter = new FileNameExtensionFilter(
          "txt files (*.txt)", "txt");
@@ -76,6 +84,14 @@ public class BaseTXT {
         //return caminho;  
     }
 
+    public void reload() throws IOException {
+        try {
+            arquivoLido = new FileReader(chooser.getSelectedFile());
+        } catch (FileNotFoundException e) {
+            System.err.println("Arquivo não encontrado");
+        }
+    }
+
     /**
      * Proximo caracter.
      *
@@ -83,8 +99,7 @@ public class BaseTXT {
      */
     public char readch() throws IOException {
         return (char) arquivoLido.read();
-        
-        
+
     }
 
     /**
@@ -98,6 +113,7 @@ public class BaseTXT {
 
     /**
      * Gravacao da string..
+     *
      * @param texto a ser gravado
      * @param acabou o fim do arquivo?
      */
@@ -112,8 +128,23 @@ public class BaseTXT {
         }
 
     }
-    
-    public boolean arquivoLidoPronto() throws IOException{
+
+    /**
+     * Gravacao da string..
+     *
+     * @param stBuffer
+     */
+    public void escreverArquivoSintatico(StringBuffer stBuffer) {
+        //WriteFile
+        PrintWriter escreve_linha = new PrintWriter(arquivoGravarSintatico, true);
+        //escreve_linha.printf("%n" +"  "+ "%s" + "  " + "%n",texto);
+        escreve_linha.println(stBuffer.toString());
+        escreve_linha.close();
+        System.out.println("acabou de ler! ");
+
+    }
+
+    public boolean arquivoLidoPronto() throws IOException {
         return arquivoLido.ready();
     }
 
