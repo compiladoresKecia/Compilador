@@ -9,7 +9,8 @@ import lexer.Token;
 /**
  * Syntax Criado.
  * 
- * TESTE POSITIVO?
+ * CARAMBA
+ * 
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
  *
