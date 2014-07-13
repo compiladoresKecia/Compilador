@@ -2,41 +2,38 @@
 
 
 Linha	Lexema		Valor
-  1      start		256
-  2      int		269
-  2      a		294
-  2      ,		284
-  2      b		294
+  1      int		269
+  1      pontuacao		294
+  1      ,		284
+  1      pontuacaoMaxina		294
+  1      ,		284
+  1      disponibilidade		294
+  1      ;		285
+  2      string		271
+  2      pontuacaoMinima		294
   2      ;		285
-  4      if		258
-  4      (		286
-  4      a		294
-  4      >		273
-  4      b		294
-  4      )		287
-  4      then		259
-  5      b		294
+  4      disponibilidade		294
+  4      =		282
+  4      "Sim"		291
+  4      ;		285
+  5      pontuacaoMinima		294
   5      =		282
-  5      a		294
+  5      50		290
   5      ;		285
-  6      else		260
-  7      a		294
-  7      =		282
-  7      b		294
-  7      ;		285
-  8      end		261
-  10      exit		257
+  6      pontuacaoMaxima		294
+  6      =		282
+  6      100		290
+  6      ;		285
 
 	**Identificadores**
- b
- a
+ disponibilidade
+ pontuacaoMaxima
+ pontuacao
+ pontuacaoMinima
+ pontuacaoMaxina
 	**Palavras Reservadas**
- start
  int
- if
- then
- else
- end
- exit
+ string
 	**Erros**
+	O comentario nao foi devidamente encerrado
 

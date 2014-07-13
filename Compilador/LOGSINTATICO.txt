@@ -1,1 +1,5 @@
+Erro Sintático na linha 1 próximo ao Token int
+Token esperado: 256 
+Erro Sintático na linha 22 próximo ao Token ;
+Token esperado: 257 
 

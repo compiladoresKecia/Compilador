@@ -88,6 +88,14 @@ public class Syntax {
         System.out.println(erro);
         strBuffer.append(erro);
     }
+    /**
+     * Informacoes de erro.
+     */
+    private void erroInfos(int tag){
+        erro();
+        System.out.println(" Tag a ser comido: " + tag + "\n");
+        strBuffer.append("Token esperado: " + tag + " \n");        
+    }
 
     /**
      * Tratar erro pelo modo panico.
@@ -95,10 +103,9 @@ public class Syntax {
      * @param tag
      */
     private void tratarErro(int tag) {
-        strBuffer.append("Token esperado: " + tag + " \n");
+        erroInfos(tag);
         System.out.println("LOOOP: Token esperado: " + tag + " Tokens:");
         do {
-
             advance();
             System.out.println(token.getTag());
         } while (token.getTag() != tag && lexer.arquivoPronto()
@@ -121,10 +128,7 @@ public class Syntax {
             System.out.println("eat " + token);
             advance();
         } else {
-            erro();
-            System.out.println(" Tag a ser comido: " + tag + "\n");
             tratarErro(tag);
-
         }
     }
 
@@ -146,7 +150,11 @@ public class Syntax {
                 break;
 
             default:
-                erro();
+                erroInfos(Tag.START);
+                declList();
+                stmtList();
+                eat(Tag.EXIT);
+                break;
         }
     }
 
