@@ -66,6 +66,7 @@ public class Lexer {
         reserve(new Word("then", Tag.THEN));
         reserve(new Word("else", Tag.ELSE));
         reserve(new Word("end", Tag.END));
+        reserve(new Word("do", Tag.DO));        
         reserve(new Word("while", Tag.WHILE));
         reserve(new Word("scan", Tag.SCAN));
         reserve(new Word("print", Tag.PRINT));
@@ -81,6 +82,7 @@ public class Lexer {
         palavrasReservadas.add((Tag.THEN));
         palavrasReservadas.add((Tag.ELSE));
         palavrasReservadas.add((Tag.END));
+        palavrasReservadas.add((Tag.DO));
         palavrasReservadas.add((Tag.WHILE));
         palavrasReservadas.add((Tag.SCAN));
         palavrasReservadas.add((Tag.PRINT));
