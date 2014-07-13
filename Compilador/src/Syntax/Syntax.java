@@ -208,7 +208,7 @@ public class Syntax {
      * identList := identList | lambda.
      */
     private void identListAUX() {
-        System.out.print((token.getTag() == Tag.VR) + "\n");
+        
         if (token.getTag() == Tag.VR) {
             eat(Tag.VR);
             identList();

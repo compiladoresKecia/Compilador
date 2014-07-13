@@ -91,13 +91,13 @@ Linha	Lexema		Valor
   23      63		63
 
 	**Identificadores**
- Outro
  maior
+ a
  outro
  b
- c
  do
- a
+ Outro
+ c
 	**Palavras Reservadas**
  start
  int
