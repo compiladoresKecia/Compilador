@@ -8,8 +8,8 @@ import lexer.Token;
 
 /**
  * Syntax Criado.
- * 
- * 
+ *
+ *
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
  *
@@ -47,7 +47,6 @@ public class Syntax {
         this.lexer = lexer;
         try {
             token = lexer.scan();
-            
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
@@ -66,11 +65,11 @@ public class Syntax {
      */
     private void advance() {
         try {
-                token = lexer.scan();
+            token = lexer.scan();
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
-                
+
             } else if (ex.getMessage().equals(LITERAL)) {
                 lexer.erroLiteral();
             }
@@ -84,10 +83,18 @@ public class Syntax {
      * Gera o erro.
      */
     private void erro() {
-        String erro = "Erro Sintático na linha " + (lexer.getN_linha())
+        String erro = "Erro Sintático na linha " + lexer.getN_linha()
                 + " próximo ao Token " + token.toString() + "\n";
         System.out.println(erro);
         strBuffer.append(erro);
+    }
+    /**
+     * Informacoes de erro.
+     */
+    private void erroInfos(int tag){
+        erro();
+        System.out.println(" Tag a ser comido: " + tag + "\n");
+        strBuffer.append("Token esperado: " + tag + " \n");        
     }
 
     /**
@@ -96,21 +103,19 @@ public class Syntax {
      * @param tag
      */
     private void tratarErro(int tag) {
-        strBuffer.append("Token esperado: " + tag + " \n");      
-        System.out.println("LOOP: Token esperado: " + tag +" Tokens:");
-        do{
-            
+        erroInfos(tag);
+        System.out.println("LOOOP: Token esperado: " + tag + " Tokens:");
+        do {
             advance();
             System.out.println(token.getTag());
-        }while(token.getTag()!=tag && lexer.arquivoPronto()  &&
-                token.getTag()!=Tag.PVR);
-        if(token.getTag()==Tag.PVR){
-           eat(Tag.PVR); 
-        } else if(token.getTag()==tag){
+        } while (token.getTag() != tag && lexer.arquivoPronto()
+                && token.getTag() != Tag.PVR);
+        if (token.getTag() == Tag.PVR) {
+            eat(Tag.PVR);
+        } else if (token.getTag() == tag) {
             eat(tag);
         }
-            
-       
+
     }
 
     /**
@@ -121,19 +126,14 @@ public class Syntax {
     private void eat(int tag) {
         if (token.getTag() == tag) {
             System.out.println("eat " + token);
-            System.out.println("LInha: "+ lexer.getN_linha());
             advance();
         } else {
-            erro(); 
-            System.out.println(" Tag a ser comido: "+ tag +"\n");
             tratarErro(tag);
-                     
         }
     }
 
     public void analisar() {
         program();
-        System.out.println("\n** Analise Sintatica realizada com sucesso ** ");
         lexer.gravarSintatico(strBuffer);
     }
 
@@ -150,7 +150,11 @@ public class Syntax {
                 break;
 
             default:
-                erro();
+                erroInfos(Tag.START);
+                declList();
+                stmtList();
+                eat(Tag.EXIT);
+                break;
         }
     }
 
@@ -189,10 +193,8 @@ public class Syntax {
      * declListAUX := type declList.
      */
     private void declListAUX() {
-        if (token.getTag() == Tag.PVR) {
-            eat(Tag.PVR);
-            declList();
-        }
+        eat(Tag.PVR);
+        declList();
     }
 
     /**
@@ -214,7 +216,7 @@ public class Syntax {
      * identList := identList | lambda.
      */
     private void identListAUX() {
-        
+
         if (token.getTag() == Tag.VR) {
             eat(Tag.VR);
             identList();
@@ -362,7 +364,7 @@ public class Syntax {
                 condition();
                 eat(Tag.THEN);
                 stmtList();
-                elseStmt();                
+                elseStmt();
                 break;
 
             default:
