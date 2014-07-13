@@ -105,7 +105,10 @@ public class Syntax {
                 token.getTag()!=Tag.PVR);
         if(token.getTag()==Tag.PVR){
            eat(Tag.PVR); 
+        } else if(token.getTag()==tag){
+            eat(tag);
         }
+            
        
     }
 
