@@ -8,13 +8,7 @@ import lexer.Token;
 
 /**
  * Syntax Criado.
- * 
-<<<<<<< HEAD
- * CARAMBA
-=======
- * T3ST3 NEGATIVO? 
- * by Alan
->>>>>>> origin/PRINCIPAL
+ * OPA
  * 
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
