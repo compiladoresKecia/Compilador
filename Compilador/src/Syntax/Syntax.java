@@ -264,7 +264,7 @@ public class Syntax {
                 stmtListAUX();
                 break;
             case Tag.IF:
-            case Tag.WHILE:
+            case Tag.DO:
                 stmt();
                 stmtListAUX();
                 break;
