@@ -43,7 +43,7 @@ public class BaseTXT {
     public BaseTXT() {
         this.arquivoLido = abrirArquivo();
         try {
-            arquivoGravar = new FileWriter("LOGSEMANTICO.txt", false);
+            arquivoGravar = new FileWriter("LOGLEXICO.txt", false);
             arquivoGravarSintatico = new FileWriter("LOGSINTATICO.txt", false);
         } catch (IOException ex) {
             Logger.getLogger(BaseTXT.class.getName()).log(Level.SEVERE, null, ex);
