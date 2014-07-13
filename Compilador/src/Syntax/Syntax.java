@@ -8,7 +8,7 @@ import lexer.Token;
 
 /**
  * Syntax Criado.
- *
+ * DADADADADA
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
  *
