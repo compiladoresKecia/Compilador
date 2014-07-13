@@ -8,8 +8,8 @@ import lexer.Token;
 
 /**
  * Syntax Criado.
- * 
- * 
+ *
+ *
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
  *
@@ -65,11 +65,11 @@ public class Syntax {
      */
     private void advance() {
         try {
-                token = lexer.scan();
+            token = lexer.scan();
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
-                
+
             } else if (ex.getMessage().equals(LITERAL)) {
                 lexer.erroLiteral();
             }
@@ -95,21 +95,20 @@ public class Syntax {
      * @param tag
      */
     private void tratarErro(int tag) {
-        strBuffer.append("Token esperado: " + tag + " \n");      
-        System.out.println("LOOOP: Token esperado: " + tag +" Tokens:");
-        do{
-            
+        strBuffer.append("Token esperado: " + tag + " \n");
+        System.out.println("LOOOP: Token esperado: " + tag + " Tokens:");
+        do {
+
             advance();
             System.out.println(token.getTag());
-        }while(token.getTag()!=tag && lexer.arquivoPronto()  &&
-                token.getTag()!=Tag.PVR);
-        if(token.getTag()==Tag.PVR){
-           eat(Tag.PVR); 
-        } else if(token.getTag()==tag){
+        } while (token.getTag() != tag && lexer.arquivoPronto()
+                && token.getTag() != Tag.PVR);
+        if (token.getTag() == Tag.PVR) {
+            eat(Tag.PVR);
+        } else if (token.getTag() == tag) {
             eat(tag);
         }
-            
-       
+
     }
 
     /**
@@ -122,10 +121,10 @@ public class Syntax {
             System.out.println("eat " + token);
             advance();
         } else {
-            erro(); 
-            System.out.println(" Tag a ser comido: "+ tag +"\n");
+            erro();
+            System.out.println(" Tag a ser comido: " + tag + "\n");
             tratarErro(tag);
-                     
+
         }
     }
 
@@ -186,10 +185,8 @@ public class Syntax {
      * declListAUX := type declList.
      */
     private void declListAUX() {
-        if (token.getTag() == Tag.PVR) {
-            eat(Tag.PVR);
-            declList();
-        }
+        eat(Tag.PVR);
+        declList();
     }
 
     /**
@@ -211,7 +208,7 @@ public class Syntax {
      * identList := identList | lambda.
      */
     private void identListAUX() {
-        
+
         if (token.getTag() == Tag.VR) {
             eat(Tag.VR);
             identList();
@@ -359,7 +356,7 @@ public class Syntax {
                 condition();
                 eat(Tag.THEN);
                 stmtList();
-                elseStmt();                
+                elseStmt();
                 break;
 
             default:
