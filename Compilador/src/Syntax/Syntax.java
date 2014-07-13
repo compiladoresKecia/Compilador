@@ -9,7 +9,9 @@ import lexer.Token;
 /**
  * Syntax Criado.
  * 
- * TESTE POSITIVO?
+ * T3ST3 NEGATIVO? 
+ * by Alan
+ * 
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
  *
