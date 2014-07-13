@@ -1,1 +1,3 @@
+Erro Sintático na linha 5 próximo ao Token b
+Token esperado: 259 
 

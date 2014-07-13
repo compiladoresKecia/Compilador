@@ -7,6 +7,10 @@ Linha	Lexema		Valor
   2      a		294
   2      ,		284
   2      b		294
+  2      ,		284
+  2      c		294
+  2      ,		284
+  2      d		294
   2      ;		285
   4      if		258
   4      (		286
@@ -14,27 +18,35 @@ Linha	Lexema		Valor
   4      >		273
   4      b		294
   4      )		287
-  4      then		259
   5      b		294
   5      =		282
   5      a		294
   5      ;		285
-  6      else		260
-  7      a		294
+  6      c		294
+  6      =		282
+  6      d		294
+  6      ;		285
+  7      d		294
   7      =		282
-  7      b		294
+  7      c		294
   7      ;		285
-  8      end		261
-  10      exit		257
+  8      else		260
+  9      a		294
+  9      =		282
+  9      b		294
+  9      ;		285
+  10      end		261
+  11      exit		257
 
 	**Identificadores**
  b
+ d
  a
+ c
 	**Palavras Reservadas**
  start
  int
  if
- then
  else
  end
  exit

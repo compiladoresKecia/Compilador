@@ -47,6 +47,7 @@ public class Syntax {
         this.lexer = lexer;
         try {
             token = lexer.scan();
+            
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
@@ -83,7 +84,7 @@ public class Syntax {
      * Gera o erro.
      */
     private void erro() {
-        String erro = "Erro Sintático na linha " + lexer.getN_linha()
+        String erro = "Erro Sintático na linha " + (lexer.getN_linha())
                 + " próximo ao Token " + token.toString() + "\n";
         System.out.println(erro);
         strBuffer.append(erro);
@@ -96,7 +97,7 @@ public class Syntax {
      */
     private void tratarErro(int tag) {
         strBuffer.append("Token esperado: " + tag + " \n");      
-        System.out.println("LOOOP: Token esperado: " + tag +" Tokens:");
+        System.out.println("LOOP: Token esperado: " + tag +" Tokens:");
         do{
             
             advance();
@@ -120,6 +121,7 @@ public class Syntax {
     private void eat(int tag) {
         if (token.getTag() == tag) {
             System.out.println("eat " + token);
+            System.out.println("LInha: "+ lexer.getN_linha());
             advance();
         } else {
             erro(); 
@@ -131,6 +133,7 @@ public class Syntax {
 
     public void analisar() {
         program();
+        System.out.println("\n** Analise Sintatica realizada com sucesso ** ");
         lexer.gravarSintatico(strBuffer);
     }
 
