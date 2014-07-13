@@ -1,3 +1,4 @@
-Erro Sintático na linha 5 próximo ao Token b
-Token esperado: 259 
 
+
+- Nenhum erro foi encontrado.
+Analise Sintatica realizada com sucesso!! -
