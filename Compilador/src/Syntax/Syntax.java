@@ -282,7 +282,22 @@ public class Syntax {
      * stmtListAUX := stmt stmtList.
      */
     private void stmtListAUX() {
-        stmtList();
+        switch (token.getTag()) {
+            case Tag.ID:
+            case Tag.SCAN:
+            case Tag.PRINT:
+                stmt();
+                eat(Tag.PVR);
+                stmtListAUX();
+                break;
+            case Tag.IF:
+            case Tag.DO:
+                stmt();
+                stmtListAUX();
+                break;
+            case Tag.EXIT:
+                break;
+        }
     }
 
     /**
@@ -344,8 +359,7 @@ public class Syntax {
                 condition();
                 eat(Tag.THEN);
                 stmtList();
-                elseStmt();
-                eat(Tag.END);
+                elseStmt();                
                 break;
 
             default:
@@ -361,6 +375,7 @@ public class Syntax {
             eat(Tag.ELSE);
             stmtList();
         }
+        eat(Tag.END);
     }
 
     /**

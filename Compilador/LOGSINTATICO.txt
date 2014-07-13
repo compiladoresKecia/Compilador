@@ -1,0 +1,10 @@
+Erro Sintático na linha 13 próximo ao Token maior
+Token esperado: 259 
+Erro Sintático na linha 19 próximo ao Token else
+Erro Sintático na linha 21 próximo ao Token end
+Erro Sintático na linha 22 próximo ao Token end
+Erro Sintático na linha 22 próximo ao Token end
+Erro Sintático na linha 22 próximo ao Token end
+Erro Sintático na linha 22 próximo ao Token end
+Token esperado: 257 
+
