@@ -373,6 +373,7 @@ public class Syntax {
     private void whileStmt() {
         switch (token.getTag()) {
             case Tag.DO:
+                eat(Tag.DO);
                 stmtList();
                 stmtSufix();
                 break;
