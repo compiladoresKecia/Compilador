@@ -2,38 +2,47 @@
 
 
 Linha	Lexema		Valor
-  1      int		269
-  1      pontuacao		294
-  1      ,		284
-  1      pontuacaoMaxina		294
-  1      ,		284
-  1      disponibilidade		294
-  1      ;		285
-  2      string		271
-  2      pontuacaoMinima		294
+  1      start		256
+  2      int		269
+  2      a		294
+  2      ,		284
+  2      b		294
+  2      ,		284
+  2      c		294
   2      ;		285
-  4      disponibilidade		294
+  3      c		294
+  3      =		282
+  3      a		294
+  3      +		278
+  3      b		294
+  3      ;		285
+  4      c		294
   4      =		282
-  4      "Sim"		291
+  4      c		294
+  4      +		278
+  4      1		290
   4      ;		285
-  5      pontuacaoMinima		294
-  5      =		282
-  5      50		290
+  5      print		265
+  5      (		286
+  5      c		294
+  5      )		287
   5      ;		285
-  6      pontuacaoMaxima		294
-  6      =		282
-  6      100		290
+  6      print		265
+  6      (		286
+  6      "Programa terminado. Saindo"		291
+  6      )		287
   6      ;		285
+  7      exit		257
 
 	**Identificadores**
- disponibilidade
- pontuacaoMaxima
- pontuacao
- pontuacaoMinima
- pontuacaoMaxina
+ c
+ a
+ b
 	**Palavras Reservadas**
+ start
  int
- string
+ print
+ print
+ exit
 	**Erros**
-	O comentario nao foi devidamente encerrado
 
