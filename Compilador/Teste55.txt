@@ -22,4 +22,4 @@ start
 		print ("Outro? ");
 		scan(outro);
 	while (outro >= 0) end
-exit
+exit.;

@@ -124,7 +124,6 @@ public class BaseTXT {
         escreve_linha.println(texto);
         if (acabou) {
             escreve_linha.close();
-            System.out.println("acabou de ler! ");
         }
 
     }
@@ -140,7 +139,6 @@ public class BaseTXT {
         //escreve_linha.printf("%n" +"  "+ "%s" + "  " + "%n",texto);
         escreve_linha.println(stBuffer.toString());
         escreve_linha.close();
-        System.out.println("acabou de ler! ");
 
     }
 

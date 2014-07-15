@@ -280,8 +280,7 @@ public class Lexer {
                     ch = ' ';
                     return scan();
 
-                } else {
-                    ch = ' ';
+                } else {                    
                     return Word.div;
                 }
 

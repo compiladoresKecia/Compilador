@@ -1,10 +1,10 @@
  start
- 	int a, b;
- 	
-	if (a>b) then
+ 	int a, b, c, d;
+	if (a>b) 
 		b=a;
+		c=d;
+		d=c;
 	else
 		a=b;
     end
-	
- exit
+exit

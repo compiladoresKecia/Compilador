@@ -36,6 +36,8 @@ public class Syntax {
      * StringBuffer relativo a gravacao.
      */
     private StringBuffer strBuffer;
+    
+    private boolean DeuErro=false;
 
     /**
      * Construtor do sintatico.
@@ -83,6 +85,7 @@ public class Syntax {
      * Gera o erro.
      */
     private void erro() {
+        DeuErro=true;
         String erro = "Erro Sintático na linha " + lexer.getN_linha()
                 + " próximo ao Token " + token.toString() + "\n";
         System.out.println(erro);
@@ -134,7 +137,13 @@ public class Syntax {
 
     public void analisar() {
         program();
-        lexer.gravarSintatico(strBuffer);
+        
+        if (!DeuErro){
+            System.out.println("\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -");
+            String msg = "\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -";
+            strBuffer = new StringBuffer(msg); 
+        }
+        lexer.gravarSintatico(strBuffer);        
     }
 
     /**
@@ -202,7 +211,7 @@ public class Syntax {
      */
     private void identList() {
         switch (token.getTag()) {
-            case Tag.ID:
+            case Tag.ID: 
                 identifier();
                 identListAUX();
                 break;
@@ -463,7 +472,7 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
-            case Tag.FLOAT:
+            case Tag.FLUTUANTE:
                 simpleExpr1();
                 break;
 
@@ -483,7 +492,7 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
-            case Tag.FLOAT:
+            case Tag.FLUTUANTE:
             case Tag.LITERAL:
             case Tag.AP:
             case Tag.NOT:
@@ -515,7 +524,7 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
-            case Tag.FLOAT:
+            case Tag.FLUTUANTE:
             case Tag.LITERAL:
             case Tag.AP:
             case Tag.NOT:
@@ -547,7 +556,7 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
-            case Tag.FLOAT:
+            case Tag.FLUTUANTE:
             case Tag.LITERAL:
             case Tag.AP:
             case Tag.NOT:
@@ -579,7 +588,7 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID:
             case Tag.INTEIRO:
-            case Tag.FLOAT:
+            case Tag.FLUTUANTE:
             case Tag.LITERAL:
             case Tag.AP:
                 factor();
@@ -610,7 +619,7 @@ public class Syntax {
                 break;
 
             case Tag.INTEIRO:
-            case Tag.FLOAT:
+            case Tag.FLUTUANTE:
             case Tag.LITERAL:
                 constant();
                 break;
@@ -717,8 +726,8 @@ public class Syntax {
                 eat(Tag.LITERAL);
                 break;
 
-            case Tag.FLOAT:
-                eat(Tag.FLOAT);
+            case Tag.FLUTUANTE:
+                eat(Tag.FLUTUANTE);
                 break;
 
             default:
