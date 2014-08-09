@@ -2,9 +2,11 @@ package Syntax;
 
 import java.io.IOException;
 import lexer.Lexer;
+import Semantics.Semantics;
 import lexer.SyntaxException;
 import lexer.Tag;
 import lexer.Token;
+import lexer.Word;
 
 /**
  * Syntax Criado.
@@ -14,12 +16,75 @@ import lexer.Token;
  * @version 0.1 Syntax Finalizado.
  *
  */
+
+/*
+Gramatica 
+
+1  program ::= start  [decl-list] stmt-list  exit
+2  decl-list ::= decl {decl} 
+3  decl ::= type ident-list ";" 
+4  ident-list ::= identifier {"," identListAUX }
+5  identListAUX := identList | λ.
+6  type ::= int | float  | string
+7  stmt-list ::= stmt { stmtListAUX }
+8  stmtListAUX := stmt | λ.
+9  stmt ::= assign-stmt ";" | if-stmt | while-stmt 
+10 | read-stmt ";" | write-stmt ";" 
+11 assign-stmt ::= identifier "=" simple_expr
+12 if-stmt ::=  if  condition  then  stmt-list else-stmt
+13 else-stmt ::= end | stmt-list  end
+14 condition ::= expression
+15 while-stmt ::= do stmt-list stmt-sufix
+16 stmt-sufix ::= while condition end
+17 read-stmt ::= scan  "(" identifier ")"
+18 write-stmt ::= print  "(" writable ")"
+19 writable ::= simple-expr | literal
+20 expression1 ::= simple-expr | expression
+21 expression ::= relop simple-expr | λ
+22 simple-expr1 ::= term | simple-expr 
+23 simple-expr ::= addop term | λ
+24 term1 ::= factor-a | term 
+25 term ::= mulop factor-a | λ
+26 fator-a ::= factor |  not  factor | "-" factor
+27 factor ::= identifier | constant | "(" expression ")"
+28 relop ::= "==" | ">" | ">=" | "<" | "<=" | "<>"
+29 addop ::= "+" | "-" | or
+30 mulop ::= "*" | "/" | and
+31 constant ::= integer_const | float_const | literal
+32 integer_const   ::= digit {digit}
+33 float_const ::= digit{digit} “.”digit{digit}
+34 literal ::= " “" {caractere} "”"
+35 identifier ::= letter {letter | digit }
+36 letter ::= [A-za-z]
+37 digit ::= [0-9]
+38 caractere ::= um dos caracteres ASCII, exceto “” e quebra de linha
+ 
+ */
+
+
+
+
 public class Syntax {
 
     /**
      * Lexer para a analise sintatica.
      */
     Lexer lexer;
+    
+    /**
+     * Semantics para a analise semantica.
+     */
+    Semantics semantic;
+    
+    /*
+     *               Tag    
+     *    1 - Int    290  
+     *    2 - String 291 
+     *    3 - Float  292
+     */
+    private int tipo;
+    Word current;
+    
     /**
      * Token carregado pelo lexer.
      */
@@ -49,6 +114,7 @@ public class Syntax {
         this.lexer = lexer;
         try {
             token = lexer.scan();
+            current = (Word)token;            
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
@@ -147,7 +213,7 @@ public class Syntax {
     }
 
     /**
-     * program := START declist body END.
+     * 1  program ::= start  [decl-list] stmt-list  exit
      */
     private void program() {
         switch (token.getTag()) {
@@ -168,6 +234,7 @@ public class Syntax {
     }
 
     /**
+     * 2  decl-list ::= decl {decl} 
      * declList := decl declListAUX.
      */
     private void declList() {
@@ -182,14 +249,24 @@ public class Syntax {
     }
 
     /**
-     * decl := type identList.
+     * declListAUX := type declList.
+     */
+    private void declListAUX() {
+        eat(Tag.PVR);
+        declList();
+    }  
+    
+    
+    /**
+     * 3  decl ::= type ident-list ";" 
      */
     private void decl() {
         switch (token.getTag()) {
             case Tag.INT:
             case Tag.FLOAT:
             case Tag.STRING:
-                type();
+                tipo = token.getTag();
+                type();                
                 identList();
                 break;
 
@@ -198,20 +275,17 @@ public class Syntax {
         }
     }
 
-    /**
-     * declListAUX := type declList.
-     */
-    private void declListAUX() {
-        eat(Tag.PVR);
-        declList();
-    }
+
 
     /**
-     * identList := identifier identListAUX.
+     * 4  ident-list ::= identifier {"," identListAUX }
      */
     private void identList() {
         switch (token.getTag()) {
             case Tag.ID: 
+                semantic = new Semantics(current,tipo,token.toString());
+                //semantic.Unity();
+                semantic.Type();
                 identifier();
                 identListAUX();
                 break;
@@ -222,7 +296,7 @@ public class Syntax {
     }
 
     /**
-     * identList := identList | lambda.
+     * 5  identListAUX := identList | λ.
      */
     private void identListAUX() {
 
