@@ -1,8 +1,11 @@
 package Syntax;
 
+import Environment.Ambiente;
 import java.io.IOException;
 import lexer.Lexer;
 import Semantics.Semantics;
+import java.util.Iterator;
+import java.util.Set;
 import lexer.SyntaxException;
 import lexer.Tag;
 import lexer.Token;
@@ -209,7 +212,22 @@ public class Syntax {
             String msg = "\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -";
             strBuffer = new StringBuffer(msg); 
         }
-        lexer.gravarSintatico(strBuffer);        
+        lexer.gravarSintatico(strBuffer);
+        
+        //Mostrar tabela de Simbolos
+        int i=0;        
+        System.out.println("****\t\tTabela de Simbolos\t\t***");
+        System.out.println("Linha "+"Identificador\t"+"Tipo\t\n\n");
+        Set<Word> words = Ambiente.gerarHashMap();
+        Iterator<Word> iterator = words.iterator();
+        while (iterator.hasNext()) {            
+            Word palavra = iterator.next();
+            if (palavra.getTag() == Tag.ID) {
+                i++;
+                System.out.println(i+":\t" +palavra.toString()+"\t"+palavra.getType()+"\t");
+            }
+        }
+        
     }
 
     /**
@@ -284,8 +302,9 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID: 
                 semantic = new Semantics(current,tipo,token.toString());
-                //semantic.Unity();
+                System.out.println(tipo);
                 semantic.Type();
+                semantic.Unity();                
                 identifier();
                 identListAUX();
                 break;
