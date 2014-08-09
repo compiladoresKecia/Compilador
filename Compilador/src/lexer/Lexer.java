@@ -27,8 +27,7 @@ public class Lexer {
     private int n_linha = 1;     //Numero de linhas do programa     
     private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
     private final BaseTXT baseTXT;
-    private final Ambiente ambiente;
-    private final Identificador idVazio;
+    private static Identificador idVazio;
     private final ArrayList<Integer> palavrasReservadas;
     //Tokens que sao uma palavra reservada
     private final ArrayList<Token> tokenPalavraReservada;
@@ -43,11 +42,11 @@ public class Lexer {
      * @param baseTXT
      */
     public Lexer(BaseTXT baseTXT) {
-        this.ambiente = new Ambiente(null);
         this.idVazio = new Identificador(0);
         listaDeErros = new ArrayList<>();
         palavrasReservadas = new ArrayList<>();
         tokenPalavraReservada = new ArrayList<>();
+        Ambiente ambiente = new Ambiente();
         //Insere palavras reservadas na HashTable
         inserirPalavrasReservadas();
         this.baseTXT = baseTXT;
@@ -96,8 +95,8 @@ public class Lexer {
      *
      * @param t
      */
-    private void reserve(Word t) {
-        ambiente.put(t, idVazio);
+    private static void reserve(Word t) {
+        Ambiente.table.put(t, idVazio);
     }
 
     /**
@@ -183,14 +182,14 @@ public class Lexer {
             valor = Float.parseFloat(numero);
             //return new Flutuante(valor);
             Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
-            ambiente.put(w, idVazio);
+            Ambiente.table.put(w, idVazio);
             return w;
 
         } else {
             value = Integer.parseInt(numero);
             //return new Inteiro(value);
             Word w = new Word(String.valueOf(value), Tag.INTEIRO);
-            ambiente.put(w, idVazio);
+            Ambiente.table.put(w, idVazio);
             return w;
 
         }
@@ -343,12 +342,12 @@ public class Lexer {
             readch();
         } while (Character.isLetterOrDigit(ch));
         String s = sb.toString();
-        Word w = ambiente.getPeloLexema(s);
+        Word w = Ambiente.getPeloLexema(s);
         if (w != null) {
             return w; //palavra já existe na HashTable
         }
         w = new Word(s, Tag.ID);
-        ambiente.put(w, idVazio);
+        Ambiente.table.put(w, idVazio);
         return w;
     }
 
@@ -471,7 +470,7 @@ public class Lexer {
     private void obterIdentificadores() {
         baseTXT.escreverArquivo("", false);
         baseTXT.escreverArquivo("\t**Identificadores**", false);
-        Set<Word> words = ambiente.gerarHashMap();
+        Set<Word> words = Ambiente.gerarHashMap();
         Iterator<Word> iterator = words.iterator();
         while (iterator.hasNext()) {
             Word palavra = iterator.next();

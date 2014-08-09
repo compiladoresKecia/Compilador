@@ -3,6 +3,8 @@ package lexer;
 public class Word extends Token{
 	
     public String lexeme = "";
+    
+    private String type;        //utilizado para definir o tipo do identificador
             
     //public static final Word and = new Word ("&&", Tag.AND);    
     //public static final Word or = new Word ("||", Tag.OR);
@@ -43,5 +45,15 @@ public class Word extends Token{
          */
         public String toString(){
             return "" + lexeme;
-        }       
+        }     
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        
 }

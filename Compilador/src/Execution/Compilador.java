@@ -30,7 +30,7 @@ public class Compilador {
         Syntax syntax;
         if (baseTXT.arquivoLidoPronto()){
             Lexer lexer = new Lexer(baseTXT);            
-            lexer.analiseLexica();
+            //lexer.analiseLexica();
             //Reload arquivo e abre um novo lexer.
             baseTXT.reload();
             lexer = new Lexer(baseTXT);

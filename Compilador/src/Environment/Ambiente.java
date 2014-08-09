@@ -19,7 +19,7 @@ import lexer.Word;
  */
 public class Ambiente {
 
-    private Hashtable<Word,Identificador> table;
+    public static Hashtable<Word,Identificador> table;
     protected Ambiente prev;
 
     /**
@@ -30,6 +30,10 @@ public class Ambiente {
     public Ambiente(Ambiente prev) {
         this.table = new Hashtable<Word,Identificador>();
         this.prev = prev;
+    }
+    
+    public Ambiente() {
+        this.table = new Hashtable<Word,Identificador>();        
     }
 
     /**A alterar.
@@ -83,7 +87,7 @@ public class Ambiente {
      * @param lexema
      * @return 
      */
-    public Word getPeloLexema(String lexema){
+    public static Word getPeloLexema(String lexema){
         for(Word key: table.keySet()){
             if (key.toString().equals(lexema)){
                 return key;
@@ -95,7 +99,7 @@ public class Ambiente {
      * Obtem um set dos words.
      * @return 
      */
-    public Set<Word> gerarHashMap(){
+    public static Set<Word> gerarHashMap(){
         return table.keySet();
     }
 }
