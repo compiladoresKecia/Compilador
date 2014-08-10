@@ -7,7 +7,9 @@ package Environment;
 
 import Environment.id.Identificador;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Set;
+import lexer.Tag;
 import lexer.Token;
 import lexer.Word;
 
@@ -102,4 +104,23 @@ public class Ambiente {
     public static Set<Word> gerarHashMap(){
         return table.keySet();
     }
+    
+    public static void MostrarTabelaSimbolos(){
+        
+        int i=0;        
+        System.out.println("****\t\tTabela de Simbolos\t\t***\n");
+        System.out.println("Entrada "+"Identificador\t"+"Tipo\t\n");
+        Set<Word> words = Ambiente.gerarHashMap();
+        Iterator<Word> iterator = words.iterator();
+        while (iterator.hasNext()) {            
+            Word palavra = iterator.next();
+            if (palavra.getTag() == Tag.ID) {
+                i++;
+                System.out.println(i+":\t" +palavra.toString()+"\t\t"+palavra.getType()+"\t");
+            }
+        }
+        
+    }
+    
+    
 }
