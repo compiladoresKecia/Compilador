@@ -25,6 +25,7 @@ import java.util.*;
 public class Lexer {
 
     private int n_linha = 1;     //Numero de linhas do programa     
+    private static int linha_identificador = 1;  //Linha do Identificador     
     private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
     private final BaseTXT baseTXT;
     private static Identificador idVazio;
@@ -132,6 +133,13 @@ public class Lexer {
      */
     public int getN_linha() {
         return n_linha;
+    }
+    
+    /*
+     * Linha de um identificador
+     */
+    public static int getLinhaID() {
+        return linha_identificador;
     }
 
     /**
@@ -335,7 +343,7 @@ public class Lexer {
      * @return
      * @throws IOException
      */
-    public Token tratarIdentificador() throws IOException {
+    public Token tratarIdentificador() throws IOException {        
         StringBuffer sb = new StringBuffer();
         do {
             sb.append(ch);
@@ -348,6 +356,8 @@ public class Lexer {
         }
         w = new Word(s, Tag.ID);
         Ambiente.table.put(w, idVazio);
+        linha_identificador = n_linha;
+        // Ambiente.MostrarTabelaSimbolos();  //TESTE
         return w;
     }
 

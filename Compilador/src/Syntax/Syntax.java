@@ -17,6 +17,7 @@ import lexer.Word;
  *
  * @author Guilherme e Alan Goncalves
  * @version 0.1 Syntax Finalizado.
+ * @version 0.1 Semantics Unicidade feito
  *
  */
 
@@ -80,12 +81,13 @@ public class Syntax {
     Semantics semantic;
     
     /*
-     *               Tag    
-     *    1 - Int    290  
-     *    2 - String 291 
-     *    3 - Float  292
+     * tipo da variavel para analise semantica    
      */
     private int tipo;
+    
+    /*
+     * Word (lexema) atual para analise semantica
+     */    
     Word current;
     
     /**
@@ -106,6 +108,10 @@ public class Syntax {
     private StringBuffer strBuffer;
     
     private boolean DeuErro=false;
+    
+    private int linha ;
+
+
 
     /**
      * Construtor do sintatico.
@@ -137,6 +143,8 @@ public class Syntax {
     private void advance() {
         try {
             token = lexer.scan();
+            //linha = lexer.getN_linha();
+            //System.out.println(linha+token.toString());            
         } catch (SyntaxException ex) {
             if (ex.getMessage().equals(COMENTARIO)) {
                 lexer.erroComentario();
@@ -154,8 +162,11 @@ public class Syntax {
      * Gera o erro.
      */
     private void erro() {
+        linha = lexer.getN_linha();
         DeuErro=true;
-        String erro = "Erro Sintático na linha " + lexer.getN_linha()
+        /*String erro = "Erro Sintático na linha " + lexer.getN_linha()
+                + " próximo ao Token " + token.toString() + "\n";*/
+        String erro = "Erro Sintático na linha " + linha
                 + " próximo ao Token " + token.toString() + "\n";
         System.out.println(erro);
         strBuffer.append(erro);
@@ -197,36 +208,36 @@ public class Syntax {
      */
     private void eat(int tag) {
         if (token.getTag() == tag) {
-            System.out.println("eat " + token);
+            //System.out.println("eat " + token);
             advance();
         } else {
             tratarErro(tag);
         }
     }
 
+    //Recuperar linha do token
+    public int getLinha() {
+        return linha;
+    }
+        
+    
     public void analisar() {
         program();
         
         if (!DeuErro){
-            System.out.println("\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -");
-            String msg = "\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -";
+            System.out.println("\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -\n\n");
+            String msg = "\n\n- Nenhum erro foi encontrado.\n" +"\nAnalise Sintatica realizada com sucesso!! -\n\n";
             strBuffer = new StringBuffer(msg); 
         }
         lexer.gravarSintatico(strBuffer);
         
-        //Mostrar tabela de Simbolos
-        int i=0;        
-        System.out.println("****\t\tTabela de Simbolos\t\t***");
-        System.out.println("Linha "+"Identificador\t"+"Tipo\t\n\n");
-        Set<Word> words = Ambiente.gerarHashMap();
-        Iterator<Word> iterator = words.iterator();
-        while (iterator.hasNext()) {            
-            Word palavra = iterator.next();
-            if (palavra.getTag() == Tag.ID) {
-                i++;
-                System.out.println(i+":\t" +palavra.toString()+"\t"+palavra.getType()+"\t");
-            }
-        }
+        /*
+         * 
+         * Mostrar tabela de Simbolos
+         * 
+         */
+        
+        Ambiente.MostrarTabelaSimbolos();
         
     }
 
@@ -239,7 +250,7 @@ public class Syntax {
                 eat(Tag.START);
                 declList();
                 stmtList();
-                eat(Tag.EXIT);
+                eat(Tag.EXIT);                
                 break;
 
             default:
@@ -293,8 +304,7 @@ public class Syntax {
         }
     }
 
-
-
+    
     /**
      * 4  ident-list ::= identifier {"," identListAUX }
      */
@@ -302,9 +312,7 @@ public class Syntax {
         switch (token.getTag()) {
             case Tag.ID: 
                 semantic = new Semantics(current,tipo,token.toString());
-                System.out.println(tipo);
                 semantic.Type();
-                semantic.Unity();                
                 identifier();
                 identListAUX();
                 break;
@@ -413,6 +421,7 @@ public class Syntax {
     private void stmt() {
         switch (token.getTag()) {
             case Tag.ID:
+                semantic.Absence();
                 assignStmt();
                 break;
 
@@ -566,6 +575,7 @@ public class Syntax {
             case Tag.ID:
             case Tag.INTEIRO:
             case Tag.FLUTUANTE:
+                semantic.Absence();
                 simpleExpr1();
                 break;
 
