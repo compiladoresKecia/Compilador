@@ -1,7 +1,5 @@
-
-
-- Nenhum erro foi encontrado.
-
-Analise Sintatica realizada com sucesso!! -
-
+Erro Sintático na linha 23 próximo ao Token (
+Token esperado: 282 
+Erro Sintático na linha 24 próximo ao Token (
+Token esperado: 285 
 

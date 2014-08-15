@@ -3,99 +3,131 @@
 
 Linha	Lexema		Valor
   1      start		256
-  2      int		269
-  2      a		294
-  2      ,		284
-  2      b		294
-  2      ;		285
   3      int		269
-  3      result		294
+  3      a		294
+  3      ,		284
+  3      aux		294
+  3      ,		284
+  3      b		294
   3      ;		285
-  4      float		270
-  4      x		294
+  4      string		271
+  4      nome		294
   4      ,		284
-  4      total		294
+  4      sobrenome		294
+  4      ,		284
+  4      msg		294
   4      ;		285
-  6      a		294
-  6      =		282
-  6      2		290
+  6      print		265
+  6      (		286
+  6      "Nome: "		291
+  6      )		287
   6      ;		285
-  7      x		294
-  7      =		282
-  7      0.1		292
+  7      scan		264
+  7      (		286
+  7      nome		294
+  7      )		287
   7      ;		285
-  8      scan		264
+  8      print		265
   8      (		286
-  8      b		294
+  8      "Sobrenome: "		291
   8      )		287
   8      ;		285
   9      scan		264
   9      (		286
-  9      x		294
+  9      sobrenome		294
   9      )		287
   9      ;		285
-  10      result		294
+  10      msg		294
   10      =		282
-  10      (		286
-  10      a		294
-  10      *		280
-  10      b		294
+  10      "Ola, "		291
   10      +		278
-  10      1		290
-  10      )		287
-  10      /		281
-  10      2		290
-  10      ;		285
-  11      print		265
-  11      (		286
-  11      "Resultado: "		291
-  11      )		287
+  10      nome		294
+  10      +		278
+  10      " "		291
+  10      +		278
+  11      sobrenome		294
+  11      +		278
+  11      "!"		291
   11      ;		285
-  12      print		265
-  12      (		286
-  12      result		294
-  12      )		287
+  12      msg		294
+  12      =		282
+  12      msg		294
+  12      +		278
+  12      1		290
   12      ;		285
   13      print		265
   13      (		286
-  13      "Total: "		291
+  13      msg		294
   13      )		287
   13      ;		285
-  14      total		294
-  14      =		282
-  14      result		294
-  14      /		281
-  14      x		294
-  14      ;		285
-  15      print		265
+  15      scan		264
   15      (		286
-  15      "Total: "		291
+  15      a		294
   15      )		287
   15      ;		285
-  16      print		265
+  16      scan		264
   16      (		286
-  16      total		294
+  16      b		294
   16      )		287
   16      ;		285
-  17      exit		257
+  17      if		258
+  17      (		286
+  17      a		294
+  17      >		273
+  17      b		294
+  17      )		287
+  17      then		259
+  18      aux		294
+  18      =		282
+  18      b		294
+  18      ;		285
+  19      b		294
+  19      =		282
+  19      a		294
+  19      ;		285
+  20      a		294
+  20      =		282
+  20      aux		294
+  20      ;		285
+  21      end		261
+  22      print		265
+  22      (		286
+  22      "Apos a troca: "		291
+  22      )		287
+  22      ;		285
+  23      out		294
+  23      (		286
+  23      a		294
+  23      )		287
+  23      ;		285
+  24      out		294
+  24      (		286
+  24      b		294
+  24      )		287
+  25      exit		257
 
 	**Identificadores**
  b
- total
+ out
+ msg
+ sobrenome
+ nome
+ aux
  a
- result
- x
 	**Palavras Reservadas**
  start
  int
- int
- float
+ string
+ print
+ scan
+ print
+ scan
+ print
  scan
  scan
- print
- print
- print
- print
+ if
+ then
+ end
  print
  exit
 	**Erros**

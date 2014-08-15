@@ -145,9 +145,9 @@ public class Semantics
     {
       System.out.println("Word leftside: " + lexema + "\n Word :" + this.word.toString());
       Word leftSide = consultLexemaEnviroment(lexema);
-      if (leftSide != null)
+      if (leftSide != null && tipo == 294)
       {
-        if (this.word.getType() == null)
+        if (this.word.getType() == null )
         {
           System.out.println("\n\nErro semantico! ");
           System.out.println("\nVariavel [" + this.word.toString() + "] foi utilizada mas NAO foi declarada." + "\nLinha: " + this.linha + "\n\n");
@@ -180,12 +180,7 @@ public class Semantics
           return erro;
         }
       }
-      else
-      {
-        System.out.println("Erro semantico! Variavel [ " + lexema + " ] incompativel." + "\nLinha: " + this.linha);
-        erro = "Erro semantico! Variavel [ " + lexema + " ] incompativel." + "\nLinha: " + this.linha;
-        return erro;
-      }
+      
     }
     else if ((this.word.getType() == null) && (this.tipo == 294))
     {
