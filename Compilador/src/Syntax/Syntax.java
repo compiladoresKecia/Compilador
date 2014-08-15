@@ -1,812 +1,599 @@
 package Syntax;
 
-import java.io.IOException;
-import lexer.Lexer;
+import Environment.Ambiente;
 import Semantics.Semantics;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import lexer.Lexer;
 import lexer.SyntaxException;
-import lexer.Tag;
 import lexer.Token;
 import lexer.Word;
 
-/**
- * Syntax Criado.
- *
- *
- * @author Guilherme e Alan Goncalves
- * @version 0.1 Syntax Finalizado.
- *
- */
-
-/*
-Gramatica 
-
-1  program ::= start  [decl-list] stmt-list  exit
-2  decl-list ::= decl {decl} 
-3  decl ::= type ident-list ";" 
-4  ident-list ::= identifier {"," identListAUX }
-5  identListAUX := identList | λ.
-6  type ::= int | float  | string
-7  stmt-list ::= stmt { stmtListAUX }
-8  stmtListAUX := stmt | λ.
-9  stmt ::= assign-stmt ";" | if-stmt | while-stmt 
-10 | read-stmt ";" | write-stmt ";" 
-11 assign-stmt ::= identifier "=" simple_expr
-12 if-stmt ::=  if  condition  then  stmt-list else-stmt
-13 else-stmt ::= end | stmt-list  end
-14 condition ::= expression
-15 while-stmt ::= do stmt-list stmt-sufix
-16 stmt-sufix ::= while condition end
-17 read-stmt ::= scan  "(" identifier ")"
-18 write-stmt ::= print  "(" writable ")"
-19 writable ::= simple-expr | literal
-20 expression1 ::= simple-expr | expression
-21 expression ::= relop simple-expr | λ
-22 simple-expr1 ::= term | simple-expr 
-23 simple-expr ::= addop term | λ
-24 term1 ::= factor-a | term 
-25 term ::= mulop factor-a | λ
-26 fator-a ::= factor |  not  factor | "-" factor
-27 factor ::= identifier | constant | "(" expression ")"
-28 relop ::= "==" | ">" | ">=" | "<" | "<=" | "<>"
-29 addop ::= "+" | "-" | or
-30 mulop ::= "*" | "/" | and
-31 constant ::= integer_const | float_const | literal
-32 integer_const   ::= digit {digit}
-33 float_const ::= digit{digit} “.”digit{digit}
-34 literal ::= " “" {caractere} "”"
-35 identifier ::= letter {letter | digit }
-36 letter ::= [A-za-z]
-37 digit ::= [0-9]
-38 caractere ::= um dos caracteres ASCII, exceto “” e quebra de linha
- 
- */
-
-
-
-
 public class Syntax {
 
-    /**
-     * Lexer para a analise sintatica.
-     */
     Lexer lexer;
-    
-    /**
-     * Semantics para a analise semantica.
-     */
     Semantics semantic;
-    
-    /*
-     *               Tag    
-     *    1 - Int    290  
-     *    2 - String 291 
-     *    3 - Float  292
-     */
     private int tipo;
     Word current;
-    
-    /**
-     * Token carregado pelo lexer.
-     */
     Token token = null;
-    /**
-     * COMENTARIO.
-     */
-    private final static String COMENTARIO = "COMENTARIO";
-    /**
-     * LITERAL.
-     */
-    private final static String LITERAL = "LITERAL";
-    /**
-     * StringBuffer relativo a gravacao.
-     */
+    private static final String COMENTARIO = "COMENTARIO";
+    private static final String LITERAL = "LITERAL";
     private StringBuffer strBuffer;
-    
-    private boolean DeuErro=false;
+    private StringBuffer strBufferSemantico;
 
-    /**
-     * Construtor do sintatico.
-     *
-     * @param lexer
-     */
+    private LinkedHashSet<String> stringTemporario = new LinkedHashSet<String>();
+    private boolean DeuErro = false;
+    private int linha;
+
     public Syntax(Lexer lexer) {
         this.strBuffer = new StringBuffer();
+        this.strBufferSemantico = new StringBuffer();
         this.lexer = lexer;
         try {
-            token = lexer.scan();
-            current = (Word)token;            
+            this.token = lexer.scan();
+            this.current = ((Word) this.token);
         } catch (SyntaxException ex) {
-            if (ex.getMessage().equals(COMENTARIO)) {
+            if (ex.getMessage().equals("COMENTARIO")) {
                 lexer.erroComentario();
-            } else if (ex.getMessage().equals(LITERAL)) {
+            } else if (ex.getMessage().equals("LITERAL")) {
                 lexer.erroLiteral();
             }
         } catch (IOException ex) {
-
             System.out.println("Ocorreu um erro ao ler o arquivo. ");
-
         }
     }
 
-    /**
-     * Gera o proximo token.
-     */
     private void advance() {
         try {
-            token = lexer.scan();
-        } catch (SyntaxException ex) {
-            if (ex.getMessage().equals(COMENTARIO)) {
-                lexer.erroComentario();
+            this.token = this.lexer.scan();
 
-            } else if (ex.getMessage().equals(LITERAL)) {
-                lexer.erroLiteral();
+            this.current = new Word(this.token, this.token.toString());
+        } catch (SyntaxException ex) {
+            if (ex.getMessage().equals("COMENTARIO")) {
+                this.lexer.erroComentario();
+            } else if (ex.getMessage().equals("LITERAL")) {
+                this.lexer.erroLiteral();
             }
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro ao ler o arquivo.");
-
         }
     }
 
-    /**
-     * Gera o erro.
-     */
     private void erro() {
-        DeuErro=true;
-        String erro = "Erro Sintático na linha " + lexer.getN_linha()
-                + " próximo ao Token " + token.toString() + "\n";
+        this.linha = this.lexer.getN_linha();
+        this.DeuErro = true;
+
+        String erro = "Erro Sintático na linha " + this.linha + " próximo ao Token " + this.token.toString() + "\n";
+
         System.out.println(erro);
-        strBuffer.append(erro);
-    }
-    /**
-     * Informacoes de erro.
-     */
-    private void erroInfos(int tag){
-        erro();
-        System.out.println(" Tag a ser comido: " + tag + "\n");
-        strBuffer.append("Token esperado: " + tag + " \n");        
+        this.strBuffer.append(erro);
     }
 
-    /**
-     * Tratar erro pelo modo panico.
-     *
-     * @param tag
-     */
+    private void erroInfos(int tag) {
+        erro();
+        System.out.println(" Tag a ser comido: " + tag + "\n");
+        this.strBuffer.append("Token esperado: " + tag + " \n");
+    }
+
     private void tratarErro(int tag) {
         erroInfos(tag);
         System.out.println("LOOOP: Token esperado: " + tag + " Tokens:");
         do {
             advance();
-            System.out.println(token.getTag());
-        } while (token.getTag() != tag && lexer.arquivoPronto()
-                && token.getTag() != Tag.PVR);
-        if (token.getTag() == Tag.PVR) {
-            eat(Tag.PVR);
-        } else if (token.getTag() == tag) {
+            System.out.println(this.token.getTag());
+        } while ((this.token.getTag() != tag) && (this.lexer.arquivoPronto()) && (this.token.getTag() != 285));
+        if (this.token.getTag() == 285) {
+            eat(285);
+        } else if (this.token.getTag() == tag) {
             eat(tag);
         }
-
     }
 
-    /**
-     * Elimina o tag e := um novo. Se estiver incorreto gera erro.
-     *
-     * @param tag
-     */
     private void eat(int tag) {
-        if (token.getTag() == tag) {
-            System.out.println("eat " + token);
+        if (this.token.getTag() == tag) {
             advance();
         } else {
             tratarErro(tag);
         }
     }
 
+    public int getLinha() {
+        return this.linha;
+    }
+
     public void analisar() {
         program();
-        
-        if (!DeuErro){
-            System.out.println("\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -");
-            String msg = "\n\n- Nenhum erro foi encontrado.\n" +"Analise Sintatica realizada com sucesso!! -";
-            strBuffer = new StringBuffer(msg); 
+        if (!this.DeuErro) {
+            System.out.println("\n\n- Nenhum erro foi encontrado.\nAnalise Sintatica realizada com sucesso!! -\n\n");
+            String msg = "\n\n- Nenhum erro foi encontrado.\n\nAnalise Sintatica realizada com sucesso!! -\n\n";
+            this.strBuffer = new StringBuffer(msg);
         }
-        lexer.gravarSintatico(strBuffer);        
+        this.lexer.gravarSintatico(this.strBuffer);
+        gravarBufferSemantico();
+        this.lexer.gravarSemantico(this.strBufferSemantico);
+
+        Ambiente.MostrarTabelaSimbolos();
     }
 
-    /**
-     * 1  program ::= start  [decl-list] stmt-list  exit
-     */
     private void program() {
-        switch (token.getTag()) {
-            case Tag.START:
-                eat(Tag.START);
+        switch (this.token.getTag()) {
+            case 256:
+                eat(256);
                 declList();
                 stmtList();
-                eat(Tag.EXIT);
+                eat(257);
                 break;
-
             default:
-                erroInfos(Tag.START);
+                erroInfos(256);
                 declList();
                 stmtList();
-                eat(Tag.EXIT);
-                break;
+                eat(257);
         }
     }
 
-    /**
-     * 2  decl-list ::= decl {decl} 
-     * declList := decl declListAUX.
-     */
     private void declList() {
-        switch (token.getTag()) {
-            case Tag.INT:
-            case Tag.FLOAT:
-            case Tag.STRING:
+        switch (this.token.getTag()) {
+            case 269:
+            case 270:
+            case 271:
                 decl();
                 declListAUX();
-                break;
         }
     }
 
-    /**
-     * declListAUX := type declList.
-     */
     private void declListAUX() {
-        eat(Tag.PVR);
+        eat(285);
         declList();
-    }  
-    
-    
-    /**
-     * 3  decl ::= type ident-list ";" 
-     */
+    }
+
     private void decl() {
-        switch (token.getTag()) {
-            case Tag.INT:
-            case Tag.FLOAT:
-            case Tag.STRING:
-                tipo = token.getTag();
-                type();                
+        switch (this.token.getTag()) {
+            case 269:
+            case 270:
+            case 271:
+                this.tipo = this.token.getTag();
+                type();
                 identList();
                 break;
-
             default:
                 erro();
         }
     }
 
-
-
-    /**
-     * 4  ident-list ::= identifier {"," identListAUX }
-     */
     private void identList() {
-        switch (token.getTag()) {
-            case Tag.ID: 
-                semantic = new Semantics(current,tipo,token.toString());
-                //semantic.Unity();
-                semantic.Type();
+        switch (this.token.getTag()) {
+            case 294:
+                this.semantic = new Semantics(this.current, this.tipo, this.token.toString());
+                adicionarElemento(this.semantic.Type());
                 identifier();
                 identListAUX();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * 5  identListAUX := identList | λ.
-     */
     private void identListAUX() {
-
-        if (token.getTag() == Tag.VR) {
-            eat(Tag.VR);
+        if (this.token.getTag() == 284) {
+            eat(284);
             identList();
         }
     }
 
-    /**
-     * type := "int" | "char".
-     */
     private void type() {
-        switch (token.getTag()) {
-            case Tag.INT:
-                eat(Tag.INT);
+        switch (this.token.getTag()) {
+            case 269:
+                eat(269);
                 break;
-
-            case Tag.STRING:
-                eat(Tag.STRING);
+            case 271:
+                eat(271);
                 break;
-
-            case Tag.FLOAT:
-                eat(Tag.FLOAT);
+            case 270:
+                eat(270);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * identifier := id.
-     */
     private void identifier() {
-        switch (token.getTag()) {
-            case Tag.ID:
-                eat(Tag.ID);
+        switch (this.token.getTag()) {
+            case 294:
+                eat(294);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * stmtList := stmt stmtListAUX.
-     */
     private void stmtList() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.SCAN:
-            case Tag.PRINT:
+        switch (this.token.getTag()) {
+            case 264:
+            case 265:
+            case 294:
                 stmt();
-                eat(Tag.PVR);
+                eat(285);
                 stmtListAUX();
                 break;
-            case Tag.IF:
-            case Tag.DO:
+            case 258:
+            case 262:
                 stmt();
                 stmtListAUX();
                 break;
-            case Tag.EXIT:
+            case 257:
                 break;
             default:
                 erro();
         }
     }
 
-    /**
-     * stmtListAUX := stmt stmtList.
-     */
     private void stmtListAUX() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.SCAN:
-            case Tag.PRINT:
+        switch (this.token.getTag()) {
+            case 264:
+            case 265:
+            case 294:
                 stmt();
-                eat(Tag.PVR);
+                eat(285);
                 stmtListAUX();
                 break;
-            case Tag.IF:
-            case Tag.DO:
+            case 258:
+            case 262:
                 stmt();
                 stmtListAUX();
-                break;
-            case Tag.EXIT:
                 break;
         }
     }
 
-    /**
-     * stmt := assignStmt | ifStmt | whileStmt | readStmt | writeStmt.
-     */
     private void stmt() {
-        switch (token.getTag()) {
-            case Tag.ID:
+        switch (this.token.getTag()) {
+            case 294:
+                this.semantic = new Semantics(this.current, 294, this.token.toString());
+                adicionarElemento(this.semantic.Absence());
                 assignStmt();
                 break;
-
-            case Tag.IF:
+            case 258:
                 ifStmt();
                 break;
-
-            case Tag.DO:
+            case 262:
                 whileStmt();
                 break;
-
-            case Tag.SCAN:
+            case 264:
                 readStmt();
                 break;
-
-            case Tag.PRINT:
+            case 265:
                 writeStmt();
                 break;
-
-            case Tag.EXIT:
+            case 257:
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * assignStmt := identifier = simpleExpr.
-     */
     private void assignStmt() {
-        switch (token.getTag()) {
-            case Tag.ID:
-                eat(Tag.ID);
-                eat(Tag.ATRIB);
+        switch (this.token.getTag()) {
+            case 294:
+                eat(294);
+                eat(282);
                 simpleExpr1();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * ifStmt := if condition stmtList elseStmt.
-     */
     private void ifStmt() {
-        switch (token.getTag()) {
-            case Tag.IF:
-                eat(Tag.IF);
+        switch (this.token.getTag()) {
+            case 258:
+                eat(258);
                 condition();
-                eat(Tag.THEN);
+                eat(259);
                 stmtList();
                 elseStmt();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * elseStmt := stmtList | lambda.
-     */
     private void elseStmt() {
-        if (token.getTag() == Tag.ELSE) {
-            eat(Tag.ELSE);
+        if (this.token.getTag() == 260) {
+            eat(260);
             stmtList();
         }
-        eat(Tag.END);
+        eat(261);
     }
 
-    /**
-     * condition := expression.
-     */
     private void condition() {
         expression1();
     }
 
-    /**
-     * whileStmt := stmtList1 stmtSufix.
-     */
     private void whileStmt() {
-        switch (token.getTag()) {
-            case Tag.DO:
-                eat(Tag.DO);
+        switch (this.token.getTag()) {
+            case 262:
+                eat(262);
                 stmtList();
                 stmtSufix();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * stmtSufix := condition.
-     */
     private void stmtSufix() {
-        switch (token.getTag()) {
-            case Tag.WHILE:
-                eat(Tag.WHILE);
+        switch (this.token.getTag()) {
+            case 263:
+                eat(263);
                 condition();
-                eat(Tag.END);
+                eat(261);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * readStmt := identifier.
-     */
     private void readStmt() {
-        switch (token.getTag()) {
-            case Tag.SCAN:
-                eat(Tag.SCAN);
-                eat(Tag.AP);
+        switch (this.token.getTag()) {
+            case 264:
+                eat(264);
+                eat(286);
                 identifier();
-                eat(Tag.FP);
+                eat(287);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * writeStmt := writable.
-     */
     private void writeStmt() {
-        switch (token.getTag()) {
-            case Tag.PRINT:
-                eat(Tag.PRINT);
-                eat(Tag.AP);
+        switch (this.token.getTag()) {
+            case 265:
+                eat(265);
+                eat(286);
                 writable();
-                eat(Tag.FP);
+                eat(287);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * writable := simpleExpr1 | literal.
-     */
     private void writable() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.INTEIRO:
-            case Tag.FLUTUANTE:
+        switch (this.token.getTag()) {
+            case 290:
+            case 292:
+            case 294:
+                adicionarElemento( this.semantic.Absence());
                 simpleExpr1();
                 break;
-
-            case Tag.LITERAL:
-                eat(Tag.LITERAL);
+            case 291:
+                eat(291);
                 break;
-
+            case 293:
             default:
                 erro();
         }
     }
 
-    /**
-     * expression1 := simpleExpr1 expression.
-     */
     private void expression1() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.INTEIRO:
-            case Tag.FLUTUANTE:
-            case Tag.LITERAL:
-            case Tag.AP:
-            case Tag.NOT:
-            case Tag.MINUS:
+        switch (this.token.getTag()) {
+            case 266:
+            case 279:
+            case 286:
+            case 290:
+            case 291:
+            case 292:
+            case 294:
                 simpleExpr1();
                 expression();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * expression1 := relop simpleExpr1 | lambda.
-     */
     private void expression() {
-        if (token.getTag() == Tag.EQ || token.getTag() == Tag.GT || token.getTag() == Tag.GE
-                || token.getTag() == Tag.LT || token.getTag() == Tag.LE || token.getTag() == Tag.NEQ) {
+        if ((this.token.getTag() == 272) || (this.token.getTag() == 273) || (this.token.getTag() == 274) || (this.token.getTag() == 276) || (this.token.getTag() == 275) || (this.token.getTag() == 277)) {
             relop();
             simpleExpr1();
         }
     }
 
-    /**
-     * simpleExpr1 := term1 simpleExpr.
-     */
     private void simpleExpr1() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.INTEIRO:
-            case Tag.FLUTUANTE:
-            case Tag.LITERAL:
-            case Tag.AP:
-            case Tag.NOT:
-            case Tag.MINUS:
+        switch (this.token.getTag()) {
+            case 294:
+                this.semantic = new Semantics(this.current, 294, this.token.toString());
+                adicionarElemento(this.semantic.Absence());
                 term1();
                 simpleExpr();
                 break;
-
+            case 290:
+            case 291:
+            case 292:
+                this.semantic = new Semantics(this.current, this.token.getTag(), this.token.toString());
+            case 266:
+            case 279:
+            case 286:
+                term1();
+                simpleExpr();
+                break;
             default:
                 erro();
         }
     }
 
-    /**
-     * simpleExpr := + | - | or | lambda.
-     */
     private void simpleExpr() {
-        if (token.getTag() == Tag.PLUS || token.getTag() == Tag.MINUS || token.getTag() == Tag.OR) {
+        if ((this.token.getTag() == 278) || (this.token.getTag() == 279) || (this.token.getTag() == 267)) {
             addop();
             term1();
             simpleExpr();
         }
     }
 
-    /**
-     * term1 := factorA term.
-     */
     private void term1() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.INTEIRO:
-            case Tag.FLUTUANTE:
-            case Tag.LITERAL:
-            case Tag.AP:
-            case Tag.NOT:
-            case Tag.MINUS:
+        switch (this.token.getTag()) {
+            case 266:
+            case 279:
+            case 286:
+            case 290:
+            case 291:
+            case 292:
+            case 294:
                 factorA();
                 term();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * term := mulop factorA term | lambda.
-     */
     private void term() {
-        if (token.getTag() == Tag.MULT || token.getTag() == Tag.DIV || token.getTag() == Tag.AND) {
+        if ((this.token.getTag() == 280) || (this.token.getTag() == 281) || (this.token.getTag() == 268)) {
             mulop();
             factorA();
             term();
         }
     }
 
-    /**
-     * factorA := factor | not factor | - factor.
-     */
     private void factorA() {
-        switch (token.getTag()) {
-            case Tag.ID:
-            case Tag.INTEIRO:
-            case Tag.FLUTUANTE:
-            case Tag.LITERAL:
-            case Tag.AP:
+        switch (this.token.getTag()) {
+            case 286:
+            case 290:
+            case 291:
+            case 292:
+            case 294:
                 factor();
                 break;
-
-            case Tag.NOT:
-                eat(Tag.NOT);
+            case 266:
+                eat(266);
                 factor();
                 break;
-
-            case Tag.MINUS:
-                eat(Tag.MINUS);
+            case 279:
+                eat(279);
                 factor();
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * factor := identifier | constant | ( expression1 ).
-     */
     private void factor() {
-        switch (token.getTag()) {
-            case Tag.ID:
-                eat(Tag.ID);
+        switch (this.token.getTag()) {
+            case 294:
+                adicionarElemento(this.semantic.TypeAssignment(this.token.toString(), 0));
+                eat(294);
                 break;
-
-            case Tag.INTEIRO:
-            case Tag.FLUTUANTE:
-            case Tag.LITERAL:
+            case 290:
+            case 291:
+            case 292:
                 constant();
                 break;
-
-            case Tag.AP:
-                eat(Tag.AP);
+            case 286:
+                eat(286);
                 expression1();
-                eat(Tag.FP);
+                eat(287);
                 break;
-
+            case 287:
+            case 288:
+            case 289:
+            case 293:
             default:
                 erro();
         }
     }
 
-    /**
-     * relop := == | < | <= | > | >= | <>.
-     */
     private void relop() {
-        switch (token.getTag()) {
-            case Tag.EQ:
-                eat(Tag.EQ);
+        switch (this.token.getTag()) {
+            case 272:
+                eat(272);
                 break;
-
-            case Tag.GT:
-                eat(Tag.GT);
+            case 273:
+                eat(273);
                 break;
-
-            case Tag.GE:
-                eat(Tag.GE);
+            case 274:
+                eat(274);
                 break;
-
-            case Tag.LT:
-                eat(Tag.LT);
+            case 276:
+                eat(276);
                 break;
-
-            case Tag.LE:
-                eat(Tag.LE);
+            case 275:
+                eat(275);
                 break;
-
-            case Tag.NEQ:
-                eat(Tag.NEQ);
+            case 277:
+                eat(277);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * addop := + | - | or | lambda.
-     */
     private void addop() {
-        switch (token.getTag()) {
-            case Tag.PLUS:
-                eat(Tag.PLUS);
+        switch (this.token.getTag()) {
+            case 278:
+                eat(278);
                 break;
-
-            case Tag.MINUS:
-                eat(Tag.MINUS);
+            case 279:
+                eat(279);
                 break;
-
-            case Tag.OR:
-                eat(Tag.OR);
+            case 267:
+                eat(267);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * mulop := * | / | and.
-     */
     private void mulop() {
-        switch (token.getTag()) {
-            case Tag.MULT:
-                eat(Tag.MULT);
+        switch (this.token.getTag()) {
+            case 280:
+                eat(280);
                 break;
-
-            case Tag.DIV:
-                eat(Tag.DIV);
+            case 281:
+                eat(281);
                 break;
-
-            case Tag.AND:
-                eat(Tag.AND);
+            case 268:
+                eat(268);
                 break;
-
             default:
                 erro();
         }
     }
 
-    /**
-     * constant := intConst | charConst.
-     */
     private void constant() {
-        switch (token.getTag()) {
-            case Tag.INTEIRO:
-                eat(Tag.INTEIRO);
+        switch (this.token.getTag()) {
+            case 290:
+                adicionarElemento(this.semantic.TypeAssignment(null, 290));
+                
+                eat(290);
                 break;
-
-            case Tag.LITERAL:
-                eat(Tag.LITERAL);
+            case 291:
+                adicionarElemento(this.semantic.TypeAssignment(null, 291));
+                
+                eat(291);
                 break;
-
-            case Tag.FLUTUANTE:
-                eat(Tag.FLUTUANTE);
+            case 292:
+                adicionarElemento(this.semantic.TypeAssignment(null, 292));                
+                eat(292);
                 break;
-
             default:
                 erro();
         }
+    }
+
+    public void adicionarElemento(String entrada) {
+        if (entrada != null) {
+            this.stringTemporario.add(entrada);
+        }
+    }
+
+    public void gravarBufferSemantico() {
+        Iterator<String> iterator = stringTemporario.iterator();
+        while (iterator.hasNext()) {
+            strBufferSemantico.append(iterator.next());
+        }
+
     }
 
 }

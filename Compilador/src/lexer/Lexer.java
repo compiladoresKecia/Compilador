@@ -1,499 +1,402 @@
 package lexer;
 
-//Abrir arquivo
 import Environment.Ambiente;
 import Environment.id.Identificador;
 import carregarArquivo.BaseTXT;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
 
-/**
- * Analisador lexico.
- *
- * Whats New
- *
- *
- * To Do Tratar Excecoes
- *
- * @author Alan e Guilherme
- * @version 0.1 Tokens Escritos
- * @vesion 0.2 correcoes e incrementos dos comentarios
- * @version 0.3 adicionada o objeto ambiente, foi dado um identificado vazio
- * @version 0.4 excecoes adicionadas
- *
- */
-public class Lexer {
-
-    private int n_linha = 1;     //Numero de linhas do programa     
-    private char ch = ' ', chAnterior = ' ';//Caractere lido do arquivo 
-    private final BaseTXT baseTXT;
-    private final Ambiente ambiente;
-    private final Identificador idVazio;
-    private final ArrayList<Integer> palavrasReservadas;
-    //Tokens que sao uma palavra reservada
-    private final ArrayList<Token> tokenPalavraReservada;
-    private final ArrayList<String> listaDeErros;
-    private final static String COMENTARIO = "COMENTARIO";
-    private final static String LITERAL = "LITERAL";
-
-    /**
-     * Construtor (criar o arquivo de leitura e reservar as palavras na tabela
-     * de simbolo).
-     *
-     * @param baseTXT
-     */
-    public Lexer(BaseTXT baseTXT) {
-        this.ambiente = new Ambiente(null);
-        this.idVazio = new Identificador(0);
-        listaDeErros = new ArrayList<>();
-        palavrasReservadas = new ArrayList<>();
-        tokenPalavraReservada = new ArrayList<>();
-        //Insere palavras reservadas na HashTable
-        inserirPalavrasReservadas();
-        this.baseTXT = baseTXT;
-    }
-
-    /**
-     * Insere palavras reservadas na HashTable.
-     */
-    private void inserirPalavrasReservadas() {
-        reserve(new Word("start", Tag.START));
-        reserve(new Word("exit", Tag.EXIT));
-        reserve(new Word("int", Tag.INT));
-        reserve(new Word("float", Tag.FLOAT));
-        reserve(new Word("string", Tag.STRING));
-        reserve(new Word("if", Tag.IF));
-        reserve(new Word("then", Tag.THEN));
-        reserve(new Word("else", Tag.ELSE));
-        reserve(new Word("end", Tag.END));
-        reserve(new Word("do", Tag.DO));        
-        reserve(new Word("while", Tag.WHILE));
-        reserve(new Word("scan", Tag.SCAN));
-        reserve(new Word("print", Tag.PRINT));
-        reserve(new Word("not", Tag.NOT));
-        reserve(new Word("and", Tag.AND));
-        reserve(new Word("or", Tag.OR));
-        palavrasReservadas.add((Tag.START));
-        palavrasReservadas.add((Tag.EXIT));
-        palavrasReservadas.add((Tag.INT));
-        palavrasReservadas.add((Tag.FLOAT));
-        palavrasReservadas.add((Tag.STRING));
-        palavrasReservadas.add((Tag.IF));
-        palavrasReservadas.add((Tag.THEN));
-        palavrasReservadas.add((Tag.ELSE));
-        palavrasReservadas.add((Tag.END));
-        palavrasReservadas.add((Tag.DO));
-        palavrasReservadas.add((Tag.WHILE));
-        palavrasReservadas.add((Tag.SCAN));
-        palavrasReservadas.add((Tag.PRINT));
-        palavrasReservadas.add((Tag.NOT));
-        palavrasReservadas.add((Tag.AND));
-        palavrasReservadas.add((Tag.OR));
-    }
-
-    /**
-     * Metodo pra colocar as palavras reservadas na Tabela de Simbolos.
-     *
-     * @param t
-     */
-    private void reserve(Word t) {
-        ambiente.put(t, idVazio);
-    }
-
-    /**
-     * Lê o próximo caractere do arquivo
-     *
-     * @throws IOException
-     */
-    private void readch() throws IOException {
-        ch = baseTXT.readch();
-    }
-
-    //  
-    /**
-     * Lê o próximo caractere do arquivo e verifica se é igual a c.
-     *
-     * @param c
-     * @return Verdadeiro se e´ igual.
-     * @throws IOException
-     */
-    private boolean readch(char c) throws IOException {
-        readch();
-        if (ch != c) {
-            return false;
-        }
-        ch = ' ';
-        return true;
-    }
-
-    /**
-     * Obter a linha correspodente a execucao.
-     *
-     * @return
-     */
-    public int getN_linha() {
-        return n_linha;
-    }
-
-    /**
-     * Desconsidera delimitadores na entrada.
-     *
-     * @throws IOException
-     */
-    private void desconsideraDelimitadores() throws IOException {
-        //Desconsidera delimitadores na entrada
-        for (;; readch()) {
-            if (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\b') {
-                continue;
-            } else if (ch == '\n') {
-                n_linha++; //conta linhas
-            } else {
-                break;
-            }
-        }
-    }
-
-    /**
-     * Tratar numeros Inteiros e Reais.
-     *
-     * @return
-     * @throws IOException
-     */
-    public Token tratarNumeros() throws IOException {
-        float valor;
-        String numero = "";
-        int value = 0;
-
-        while (Character.isDigit(ch)) {
-            if (Character.isDigit(ch)) {
-                numero += ch;
-            }
-            readch();
-        }
-
-        if (ch == '.') {
-            numero += ch;
-            readch();
-
-            do {
-                numero += ch;
-                readch();
-            } while (Character.isDigit(ch));
-
-            valor = Float.parseFloat(numero);
-            //return new Flutuante(valor);
-            Word w = new Word(String.valueOf(valor), Tag.FLUTUANTE);
-            ambiente.put(w, idVazio);
-            return w;
-
-        } else {
-            value = Integer.parseInt(numero);
-            //return new Inteiro(value);
-            Word w = new Word(String.valueOf(value), Tag.INTEIRO);
-            ambiente.put(w, idVazio);
-            return w;
-
-        }
-
-    }
-
-    /**
-     * Caracteres não identificados em toda analise.
-     *
-     * @return
-     */
-    public Token caracterNaoIdentificado() {
-        //Caracteres não identificados
-        Token t = new Token(ch);
-        ch = ' ';
-        return t;
-    }
-
-    /**
-     * Tratar terminais.
-     *
-     * @return
-     * @throws IOException
-     * @throws SyntaxException
-     */
-    public Token tratarTerminal() throws IOException, SyntaxException {
-        switch (ch) {
-
-            //Operadores
-            case '=':
-                if (readch('=')) {
-                    return Word.eq;
-                } else {
-                    return Word.atrib;
-                }
-
-            case '>':
-                if (readch('=')) {
-                    return Word.ge;
-                } else {
-                    return Word.gt;
-                }
-
-            case '<':
-                readch();
-                if (ch == ('=')) {
-                    return Word.le;
-                } else if (ch == ('>')) {
-                    return Word.neq;
-                } else {
-                    return Word.lt;
-                }
-
-            case '+':
-                ch = ' ';
-                return Word.plus;
-
-            case '-':
-                ch = ' ';
-                return Word.minus;
-
-            case '*':
-                ch = ' ';
-                return Word.mult;
-
-            case '/':
-                readch();
-                if (ch == ('/')) {
-                    do {
-                        readch();
-                    } while (ch != '\n');
-                    ch = ' ';
-                    return scan();
-
-                } else if (ch == ('*')) {
-                    readch();
-                    desconsideraDelimitadores();
-                    chAnterior = ch;
-                    while (chAnterior != '*' && ch != '/') {
-                        chAnterior = ch;
-                        desconsideraDelimitadores();
-                        readch();
-                        if (!baseTXT.arquivoLidoPronto()) {
-                            throw new SyntaxException(COMENTARIO);
-                        }
-                    }
-                    ch = ' ';
-                    return scan();
-
-                } else {                    
-                    return Word.div;
-                }
-
-            case '(':
-                ch = ' ';
-                return Word.ap;
-
-            case ',':
-                ch = ' ';
-                return Word.vr;
-
-            case ';':
-                ch = ' ';
-                return Word.pvr;
-
-            case '.':
-                ch = ' ';
-                return Word.pt;
-
-            case ')':
-                ch = ' ';
-                return Word.fp;
-            default:
-                return caracterNaoIdentificado();
-        } //fim switch
-    }
-
-    /**
-     * Tratar textos (LITERAL).
-     *
-     * @return
-     * @throws IOException
-     */
-    public Token tratarLiteral() throws IOException, SyntaxException {
-        StringBuffer sb = new StringBuffer();
-
-        do {
-            sb.append(ch);
-            readch();
-            if (!baseTXT.arquivoLidoPronto()) {
-                throw new SyntaxException(LITERAL);
-            }
-        } while (ch != '"');
-        sb.append(ch);
-        readch();
-        String s = sb.toString();
-        return new Word(s, Tag.LITERAL);
-    }
-
-    /**
-     * Tratar os Identificadores.
-     *
-     * @return
-     * @throws IOException
-     */
-    public Token tratarIdentificador() throws IOException {
-        StringBuffer sb = new StringBuffer();
-        do {
-            sb.append(ch);
-            readch();
-        } while (Character.isLetterOrDigit(ch));
-        String s = sb.toString();
-        Word w = ambiente.getPeloLexema(s);
-        if (w != null) {
-            return w; //palavra já existe na HashTable
-        }
-        w = new Word(s, Tag.ID);
-        ambiente.put(w, idVazio);
-        return w;
-    }
-
-    /**
-     * Metodo pra ler os caracteres do arquivo e formar os tokens.
-     *
-     * @return a token dessa palavra
-     * @throws IOException A resolver.
-     * @throws SyntaxException A resolver.
-     */
-    public Token scan() throws IOException, SyntaxException {
-
-        //Desconsidera delimitadores na entrada
-        desconsideraDelimitadores();
-
-        //Tratar numeros Inteiros e Reais
-        if (Character.isDigit(ch)) {
-            return tratarNumeros();
-        }
-
-        //Tratar textos (LITERAL)
-        if (ch == '"') {
-            return tratarLiteral();
-        }
-
-        //Tratar os Identificadores
-        if (Character.isLetter(ch)) {
-            return tratarIdentificador();
-        }
-        //Tratar terminais
-        return tratarTerminal();
-
-    }
-
-    /**
-     * Erro lexico.
-     *
-     * @param caracter
-     * @param linha
-     */
-    public void erroLexico(Character caracter, int linha) {
-        listaDeErros.add("O caracter " + caracter + " na linha :" + linha + " não foi reconhecido. ");
-    }
-
-    /**
-     * Erro comentario.
-     */
-    public void erroComentario() {
-        listaDeErros.add("O comentario nao foi devidamente encerrado");
-    }
-
-    /**
-     * Erro da String.
-     */
-    public void erroLiteral() {
-        listaDeErros.add("O literal nao foi devidamente encerrado");
-    }
-
-    public boolean arquivoPronto() {
-        try {
-            return baseTXT.arquivoLidoPronto();
-        } catch (IOException e) {
-            System.out.println("Ocorreu um erro ao ler o arquivo. -> " + e);
-        }
-        return false;
-
-    }
-
-    /**
-     * Faz a análise léxica propriamente dita, formando os Tokens.
-     */
-    public void analiseLexica() {
-        try {
-            baseTXT.escreverArquivo(("\t*** TOKENS ***\n"), false);
-            baseTXT.escreverArquivo(("\nLinha"
-                    + "\tLexema\t\t" + "Valor"), false);
-
-            do {
-                Token token = new Token(0);
-
-                try {
-                    token = scan();
-                    if (token.toString().matches("\\d+")
-                            && (token.getTag() != Tag.FLUTUANTE && token.getTag() != Tag.INTEIRO)) {
-                        String s = token.toString().
-                                valueOf(Character.toChars(token.getTag()));;
-                        Character c = s.charAt(0);
-                        erroLexico(c, n_linha);
-
-                    }
-
-                    if (palavrasReservadas.contains(token.getTag())) {
-                        tokenPalavraReservada.add(token);
-                    }
-                    String saida = ("  " + n_linha
-                            + "      " + token.toString() + "\t\t" + token.getTag());
-                    baseTXT.escreverArquivo(saida, false);
-                } catch (SyntaxException ex) {
-                    if (ex.getMessage().equals(COMENTARIO)) {
-                        erroComentario();
-                    } else if (ex.getMessage().equals(LITERAL)) {
-                        erroLiteral();
-                    }
-                }
-
-            } while (baseTXT.arquivoLidoPronto());
-            obterIdentificadores();
-
-        } catch (IOException ex) {
-
-            System.out.println("Ocorreu um erro ao ler o arquivo. -> " + ex);
-
-        }
-
-    }
-
-    /**
-     * Grava os identificadores no arquivo LOG.
-     */
-    private void obterIdentificadores() {
-        baseTXT.escreverArquivo("", false);
-        baseTXT.escreverArquivo("\t**Identificadores**", false);
-        Set<Word> words = ambiente.gerarHashMap();
-        Iterator<Word> iterator = words.iterator();
-        while (iterator.hasNext()) {
-            Word palavra = iterator.next();
-            if (palavra.getTag() == Tag.ID) {
-                baseTXT.escreverArquivo(" " + palavra.lexeme, false);
-            }
-        }
-        baseTXT.escreverArquivo("\t**Palavras Reservadas**", false);
-        while (!tokenPalavraReservada.isEmpty()) {
-            baseTXT.escreverArquivo(" " + tokenPalavraReservada.remove(0).toString(), false);
-        }
-        baseTXT.escreverArquivo("\t**Erros**", false);
-        while (!listaDeErros.isEmpty()) {
-            baseTXT.escreverArquivo("\t" + listaDeErros.remove(0).toString(), false);
-        }
-
-        baseTXT.escreverArquivo("", true);
-
-    }
+public class Lexer
+{
+  private int n_linha = 1;
+  private static int linha_identificador = 1;
+  private char ch = ' ';
+  private char chAnterior = ' ';
+  private final BaseTXT baseTXT;
+  private static Identificador idVazio;
+  private final ArrayList<Integer> palavrasReservadas;
+  private final ArrayList<Token> tokenPalavraReservada;
+  private final ArrayList<String> listaDeErros;
+  private static final String COMENTARIO = "COMENTARIO";
+  private static final String LITERAL = "LITERAL";
+  
+  public Lexer(BaseTXT baseTXT)
+  {
+    idVazio = new Identificador(0);
+    this.listaDeErros = new ArrayList();
+    this.palavrasReservadas = new ArrayList();
+    this.tokenPalavraReservada = new ArrayList();
+    Ambiente ambiente = new Ambiente();
     
-    public void gravarSintatico(StringBuffer stBuffer){
-        baseTXT.escreverArquivoSintatico(stBuffer);
+    inserirPalavrasReservadas();
+    this.baseTXT = baseTXT;
+  }
+  
+  private void inserirPalavrasReservadas()
+  {
+    reserve(new Word("start", 256));
+    reserve(new Word("exit", 257));
+    reserve(new Word("int", 269));
+    reserve(new Word("float", 270));
+    reserve(new Word("string", 271));
+    reserve(new Word("if", 258));
+    reserve(new Word("then", 259));
+    reserve(new Word("else", 260));
+    reserve(new Word("end", 261));
+    reserve(new Word("do", 262));
+    reserve(new Word("while", 263));
+    reserve(new Word("scan", 264));
+    reserve(new Word("print", 265));
+    reserve(new Word("not", 266));
+    reserve(new Word("and", 268));
+    reserve(new Word("or", 267));
+    this.palavrasReservadas.add(Integer.valueOf(256));
+    this.palavrasReservadas.add(Integer.valueOf(257));
+    this.palavrasReservadas.add(Integer.valueOf(269));
+    this.palavrasReservadas.add(Integer.valueOf(270));
+    this.palavrasReservadas.add(Integer.valueOf(271));
+    this.palavrasReservadas.add(Integer.valueOf(258));
+    this.palavrasReservadas.add(Integer.valueOf(259));
+    this.palavrasReservadas.add(Integer.valueOf(260));
+    this.palavrasReservadas.add(Integer.valueOf(261));
+    this.palavrasReservadas.add(Integer.valueOf(262));
+    this.palavrasReservadas.add(Integer.valueOf(263));
+    this.palavrasReservadas.add(Integer.valueOf(264));
+    this.palavrasReservadas.add(Integer.valueOf(265));
+    this.palavrasReservadas.add(Integer.valueOf(266));
+    this.palavrasReservadas.add(Integer.valueOf(268));
+    this.palavrasReservadas.add(Integer.valueOf(267));
+  }
+  
+  private static void reserve(Word t)
+  {
+    Ambiente.table.put(t, idVazio);
+  }
+  
+  private void readch()
+    throws IOException
+  {
+    this.ch = this.baseTXT.readch();
+  }
+  
+  private boolean readch(char c)
+    throws IOException
+  {
+    readch();
+    if (this.ch != c) {
+      return false;
     }
-
+    this.ch = ' ';
+    return true;
+  }
+  
+  public int getN_linha()
+  {
+    return this.n_linha;
+  }
+  
+  public static int getLinhaID()
+  {
+    return linha_identificador;
+  }
+  
+  private void desconsideraDelimitadores()
+    throws IOException
+  {
+    for (;; readch()) {
+      if ((this.ch != ' ') && (this.ch != '\t') && (this.ch != '\r') && (this.ch != '\b'))
+      {
+        if (this.ch != '\n') {
+          break;
+        }
+        this.n_linha += 1;
+      }
+    }
+  }
+  
+  public Token tratarNumeros()
+    throws IOException
+  {
+    String numero = "";
+    int value = 0;
+    while (Character.isDigit(this.ch))
+    {
+      if (Character.isDigit(this.ch)) {
+        numero = numero + this.ch;
+      }
+      readch();
+    }
+    if (this.ch == '.')
+    {
+      numero = numero + this.ch;
+      readch();
+      do
+      {
+        numero = numero + this.ch;
+        readch();
+      } while (Character.isDigit(this.ch));
+      float valor = Float.parseFloat(numero);
+      
+      Word w = new Word(String.valueOf(valor), 292);
+      Ambiente.table.put(w, idVazio);
+      return w;
+    }
+    value = Integer.parseInt(numero);
+    
+    Word w = new Word(String.valueOf(value), 290);
+    Ambiente.table.put(w, idVazio);
+    return w;
+  }
+  
+  public Token caracterNaoIdentificado()
+  {
+    Token t = new Token(this.ch);
+    this.ch = ' ';
+    return t;
+  }
+  
+  public Token tratarTerminal()
+    throws IOException, SyntaxException
+  {
+    switch (this.ch)
+    {
+    case '=': 
+      if (readch('=')) {
+        return Word.eq;
+      }
+      return Word.atrib;
+    case '>': 
+      if (readch('=')) {
+        return Word.ge;
+      }
+      return Word.gt;
+    case '<': 
+      readch();
+      if (this.ch == '=') {
+        return Word.le;
+      }
+      if (this.ch == '>') {
+        return Word.neq;
+      }
+      return Word.lt;
+    case '+': 
+      this.ch = ' ';
+      return Word.plus;
+    case '-': 
+      this.ch = ' ';
+      return Word.minus;
+    case '*': 
+      this.ch = ' ';
+      return Word.mult;
+    case '/': 
+      readch();
+      if (this.ch == '/')
+      {
+        do
+        {
+          readch();
+        } while (this.ch != '\n');
+        this.ch = ' ';
+        return scan();
+      }
+      if (this.ch == '*')
+      {
+        readch();
+        desconsideraDelimitadores();
+        this.chAnterior = this.ch;
+        while ((this.chAnterior != '*') && (this.ch != '/'))
+        {
+          this.chAnterior = this.ch;
+          desconsideraDelimitadores();
+          readch();
+          if (!this.baseTXT.arquivoLidoPronto()) {
+            throw new SyntaxException("COMENTARIO");
+          }
+        }
+        this.ch = ' ';
+        return scan();
+      }
+      return Word.div;
+    case '(': 
+      this.ch = ' ';
+      return Word.ap;
+    case ',': 
+      this.ch = ' ';
+      return Word.vr;
+    case ';': 
+      this.ch = ' ';
+      return Word.pvr;
+    case '.': 
+      this.ch = ' ';
+      return Word.pt;
+    case ')': 
+      this.ch = ' ';
+      return Word.fp;
+    }
+    return caracterNaoIdentificado();
+  }
+  
+  public Token tratarLiteral()
+    throws IOException, SyntaxException
+  {
+    StringBuffer sb = new StringBuffer();
+    do
+    {
+      sb.append(this.ch);
+      readch();
+      if (!this.baseTXT.arquivoLidoPronto()) {
+        throw new SyntaxException("LITERAL");
+      }
+    } while (this.ch != '"');
+    sb.append(this.ch);
+    readch();
+    String s = sb.toString();
+    return new Word(s, 291);
+  }
+  
+  public Token tratarIdentificador()
+    throws IOException
+  {
+    StringBuffer sb = new StringBuffer();
+    do
+    {
+      sb.append(this.ch);
+      readch();
+    } while (Character.isLetterOrDigit(this.ch));
+    String s = sb.toString();
+    Word w = Ambiente.getPeloLexema(s);
+    if (w != null) {
+      return w;
+    }
+    w = new Word(s, 294);
+    Ambiente.table.put(w, idVazio);
+    linha_identificador = this.n_linha;
+    
+    return w;
+  }
+  
+  public Token scan()
+    throws IOException, SyntaxException
+  {
+    desconsideraDelimitadores();
+    if (Character.isDigit(this.ch)) {
+      return tratarNumeros();
+    }
+    if (this.ch == '"') {
+      return tratarLiteral();
+    }
+    if (Character.isLetter(this.ch)) {
+      return tratarIdentificador();
+    }
+    return tratarTerminal();
+  }
+  
+  public void erroLexico(Character caracter, int linha)
+  {
+    this.listaDeErros.add("O caracter " + caracter + " na linha :" + linha + " não foi reconhecido. ");
+  }
+  
+  public void erroComentario()
+  {
+    this.listaDeErros.add("O comentario nao foi devidamente encerrado");
+  }
+  
+  public void erroLiteral()
+  {
+    this.listaDeErros.add("O literal nao foi devidamente encerrado");
+  }
+  
+  public boolean arquivoPronto()
+  {
+    try
+    {
+      return this.baseTXT.arquivoLidoPronto();
+    }
+    catch (IOException e)
+    {
+      System.out.println("Ocorreu um erro ao ler o arquivo. -> " + e);
+    }
+    return false;
+  }
+  
+  public void analiseLexica()
+  {
+    try
+    {
+      this.baseTXT.escreverArquivo("\t*** TOKENS ***\n", false);
+      this.baseTXT.escreverArquivo("\nLinha\tLexema\t\tValor", false);
+      do
+      {
+        Token token = new Token(0);
+        try
+        {
+          token = scan();
+          if ((token.toString().matches("\\d+")) && (token.getTag() != 292) && (token.getTag() != 290))
+          {
+            token.toString();String s = String.valueOf(Character.toChars(token.getTag()));
+            
+            Character c = Character.valueOf(s.charAt(0));
+            erroLexico(c, this.n_linha);
+          }
+          if (this.palavrasReservadas.contains(Integer.valueOf(token.getTag()))) {
+            this.tokenPalavraReservada.add(token);
+          }
+          String saida = "  " + this.n_linha + "      " + token.toString() + "\t\t" + token.getTag();
+          
+          this.baseTXT.escreverArquivo(saida, false);
+        }
+        catch (SyntaxException ex)
+        {
+          if (ex.getMessage().equals("COMENTARIO")) {
+            erroComentario();
+          } else if (ex.getMessage().equals("LITERAL")) {
+            erroLiteral();
+          }
+        }
+      } while (this.baseTXT.arquivoLidoPronto());
+      obterIdentificadores();
+    }
+    catch (IOException ex)
+    {
+      System.out.println("Ocorreu um erro ao ler o arquivo. -> " + ex);
+    }
+  }
+  
+  private void obterIdentificadores()
+  {
+    this.baseTXT.escreverArquivo("", false);
+    this.baseTXT.escreverArquivo("\t**Identificadores**", false);
+    Set<Word> words = Ambiente.gerarHashMap();
+    Iterator<Word> iterator = words.iterator();
+    while (iterator.hasNext())
+    {
+      Word palavra = (Word)iterator.next();
+      if (palavra.getTag() == 294) {
+        this.baseTXT.escreverArquivo(" " + palavra.lexeme, false);
+      }
+    }
+    this.baseTXT.escreverArquivo("\t**Palavras Reservadas**", false);
+    while (!this.tokenPalavraReservada.isEmpty()) {
+      this.baseTXT.escreverArquivo(" " + ((Token)this.tokenPalavraReservada.remove(0)).toString(), false);
+    }
+    this.baseTXT.escreverArquivo("\t**Erros**", false);
+    while (!this.listaDeErros.isEmpty()) {
+      this.baseTXT.escreverArquivo("\t" + ((String)this.listaDeErros.remove(0)).toString(), false);
+    }
+    this.baseTXT.escreverArquivo("", true);
+  }
+  
+  public void gravarSintatico(StringBuffer stBuffer)
+  {
+    this.baseTXT.escreverArquivoSintatico(stBuffer);
+  }
+  
+  public void gravarSemantico(StringBuffer stBuffer)
+  {
+    this.baseTXT.escreverArquivoSemantico(stBuffer);
+  }
 }
