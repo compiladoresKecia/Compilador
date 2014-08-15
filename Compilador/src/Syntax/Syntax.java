@@ -112,6 +112,9 @@ public class Syntax {
         }
         this.lexer.gravarSintatico(this.strBuffer);
         gravarBufferSemantico();
+        if (strBufferSemantico.length()==0){
+            strBufferSemantico.append("Nenhum erro foi encontrado!!!\n\nAnalise semantica realizada com sucesso");
+        }
         this.lexer.gravarSemantico(this.strBufferSemantico);
 
         Ambiente.MostrarTabelaSimbolos();

@@ -7,40 +7,94 @@ Linha	Lexema		Valor
   2      a		294
   2      ,		284
   2      b		294
-  2      ,		284
-  2      c		294
   2      ;		285
-  3      c		294
-  3      =		282
-  3      a		294
-  3      +		278
-  3      b		294
+  3      int		269
+  3      result		294
   3      ;		285
-  4      c		294
-  4      =		282
-  4      c		294
-  4      +		278
-  4      1		290
+  4      float		270
+  4      x		294
+  4      ,		284
+  4      total		294
   4      ;		285
-  5      print		265
-  5      (		286
-  5      c		294
-  5      )		287
-  5      ;		285
-  6      print		265
-  6      (		286
-  6      "Programa terminado. Saindo"		291
-  6      )		287
+  6      a		294
+  6      =		282
+  6      2		290
   6      ;		285
-  7      exit		257
+  7      x		294
+  7      =		282
+  7      0.1		292
+  7      ;		285
+  8      scan		264
+  8      (		286
+  8      b		294
+  8      )		287
+  8      ;		285
+  9      scan		264
+  9      (		286
+  9      x		294
+  9      )		287
+  9      ;		285
+  10      result		294
+  10      =		282
+  10      (		286
+  10      a		294
+  10      *		280
+  10      b		294
+  10      +		278
+  10      1		290
+  10      )		287
+  10      /		281
+  10      2		290
+  10      ;		285
+  11      print		265
+  11      (		286
+  11      "Resultado: "		291
+  11      )		287
+  11      ;		285
+  12      print		265
+  12      (		286
+  12      result		294
+  12      )		287
+  12      ;		285
+  13      print		265
+  13      (		286
+  13      "Total: "		291
+  13      )		287
+  13      ;		285
+  14      total		294
+  14      =		282
+  14      result		294
+  14      /		281
+  14      x		294
+  14      ;		285
+  15      print		265
+  15      (		286
+  15      "Total: "		291
+  15      )		287
+  15      ;		285
+  16      print		265
+  16      (		286
+  16      total		294
+  16      )		287
+  16      ;		285
+  17      exit		257
 
 	**Identificadores**
- c
- a
  b
+ total
+ a
+ result
+ x
 	**Palavras Reservadas**
  start
  int
+ int
+ float
+ scan
+ scan
+ print
+ print
+ print
  print
  print
  exit
