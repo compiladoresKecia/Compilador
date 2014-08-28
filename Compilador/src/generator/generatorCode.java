@@ -274,8 +274,6 @@ public class generatorCode {
             case Tag.DIV:
                 return "DIV";
                 
-            /*case Tag.NOT:
-                return "NOT";*/
                 
             case Tag.EQ:
                 return "EQUAL";                
@@ -294,9 +292,6 @@ public class generatorCode {
                 
             case Tag.DIV:
                 return "FDIV";
-                
-            /*case Tag.NOT:
-                return "NOT";*/
                 
             case Tag.EQ:
                 return "FEQUAL";                
