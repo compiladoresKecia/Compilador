@@ -84,7 +84,7 @@ public class Syntax {
     /**
      * tipo da variavel para analise semantica.
      */
-    private int tipo, tipo_MOSTLEFT, tipo_temporario;
+    private int tipo, tipo_MOSTLEFT, tipo_temporario, indice_Temporario,operador_Expressao;
 
     /**
      * Word (lexema) atual para analise semantica.
@@ -103,16 +103,24 @@ public class Syntax {
      */
     private static final String LITERAL = "LITERAL";
     /**
+     * Argumento auxiliar.
+     */
+    private String argAux;
+    
+    
+    
+    /**
      * StringBuffer relativo a gravacao.
      */
     private StringBuffer strBuffer;
     private StringBuffer strBufferSemantico;
-
+    private generator.generatorCode generatorCode;
     private LinkedHashSet<String> stringTemporario = new LinkedHashSet<String>();
     private boolean DeuErro = false;
     private int linha;
 
     public Syntax(Lexer lexer) {
+        generatorCode = new generator.generatorCode();
         this.strBuffer = new StringBuffer();
         this.strBufferSemantico = new StringBuffer();
         this.lexer = lexer;
@@ -290,6 +298,7 @@ public class Syntax {
     private void identifier() {
         switch (this.token.getTag()) {
             case Tag.ID:
+                generatorCode.setArgumentTemporario(this.token.toString());
                 eat(Tag.ID);
                 break;
             default:
@@ -343,7 +352,9 @@ public class Syntax {
             case Tag.ID:
                 this.semantic = new Semantics(this.current, Tag.ID, this.token.toString());                
                 adicionarElemento(this.semantic.Absence());
+                generatorCode.setResultFinal(this.token.toString());
                 assignStmt();
+                generatorCode.adicionarAtrib();
                 break;
             case Tag.IF:
                 ifStmt();
@@ -430,9 +441,11 @@ public class Syntax {
     private void readStmt() {
         switch (this.token.getTag()) {
             case Tag.SCAN:
+                generatorCode.setOperatorTemporario(Tag.SCAN);
                 eat(Tag.SCAN);
                 eat(Tag.AP);
                 identifier();
+                generatorCode.adicionarCodigo(Tag.SCAN);
                 eat(Tag.FP);
                 break;
             default:
@@ -446,6 +459,7 @@ public class Syntax {
                 eat(Tag.PRINT);
                 eat(Tag.AP);
                 writable();
+                generatorCode.adicionarCodigo(Tag.PRINT);
                 eat(Tag.FP);
                 break;
             default:
@@ -497,9 +511,13 @@ public class Syntax {
 
     private void expression() {
         if ((this.token.getTag() == Tag.EQ) || (this.token.getTag() == Tag.GT) || (this.token.getTag() == Tag.GE) || (this.token.getTag() == Tag.LT) || (this.token.getTag() == Tag.LE) || (this.token.getTag() == Tag.NEQ)) {
+            operador_Expressao = this.token.getTag();
+            indice_Temporario = generatorCode.getIndiceTemporario();
             relop();
-            adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             simpleExpr1();
+            adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
+            generatorCode.adicionarCondicao(indice_Temporario);
+            
         }
     }
 
@@ -509,7 +527,7 @@ public class Syntax {
                 adicionarElemento(this.semantic.Absence());
                 term1();
                 adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
-                simpleExpr();
+                simpleExpr();                
                 break;
             case Tag.INTEIRO:
             case Tag.LITERAL:
@@ -526,9 +544,15 @@ public class Syntax {
     }
 
     private void simpleExpr() {
-        if ((this.token.getTag() == Tag.PLUS) || (this.token.getTag() == Tag.MINUS) || (this.token.getTag() == Tag.OR)) {
-            addop();
+        if ((this.token.getTag() == Tag.PLUS) || (this.token.getTag() == Tag.MINUS) || (this.token.getTag() == Tag.OR)) {            
+            generatorCode.setOperatorTemporario(this.token.getTag());
+            indice_Temporario = generatorCode.getIndiceTemporario();
+            if (indice_Temporario==0){
+                argAux = generatorCode.getArgumenTemporario();
+            }
+            addop();            
             term1();
+            generatorCode.adicionarAssigmentExpression(argAux);
             adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             simpleExpr();
         }
@@ -553,8 +577,11 @@ public class Syntax {
 
     private void term() {
         if ((this.token.getTag() == Tag.MULT) || (this.token.getTag() == Tag.DIV) || (this.token.getTag() == 268)) {
-            mulop();
+            generatorCode.setOperatorTemporario(this.token.getTag());
+            argAux = generatorCode.getArgumenTemporario();
+            mulop();            
             factorA();
+            generatorCode.adicionarAssigmentExpression(argAux);
             adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             term();
         }
@@ -586,7 +613,9 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.ID:
                 //   adicionarElemento(this.semantic.TypeAssignment(this.token.toString(), 0));
-                tipo_temporario = semantic.tipoIDLexema(token.toString());                
+                tipo_temporario = semantic.tipoIDLexema(token.toString());
+                //ID  com o resultado final
+                generatorCode.setArgumentTemporario(this.token.toString());
                 eat(Tag.ID);
                 break;
             case Tag.INTEIRO:
@@ -669,14 +698,17 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.INTEIRO:
                 tipo_temporario = Tag.INTEIRO; 
+                generatorCode.setArgumentTemporario(this.token.toString());
                 eat(Tag.INTEIRO);
                 break;
             case Tag.LITERAL:
                 tipo_temporario = Tag.LITERAL;
+                generatorCode.setArgumentTemporario(this.token.toString());
                 eat(Tag.LITERAL);
                 break;
             case Tag.FLUTUANTE:
                 tipo_temporario = Tag.FLUTUANTE;
+                generatorCode.setArgumentTemporario(this.token.toString());
                 eat(Tag.FLUTUANTE);
                 break;
             default:
