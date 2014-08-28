@@ -12,20 +12,20 @@ package Environment.id;
  */
 public class Identificador {
     //Identificacao do Identificador
-    private final int identificacao;
+    private int offset;
     /**
      * Construtor.
      * @param identificacao 
      */
     public Identificador(int identificacao) {
-        this.identificacao = identificacao;
+        this.offset = identificacao;
     }
     /**
-     * Get Identificacao.
+     * Get Offset.
      * @return 
      */
-    public int getIdentificacao() {
-        return identificacao;
+    public int getOffset() {
+        return offset;
     }
     
 }

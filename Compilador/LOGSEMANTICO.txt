@@ -1,1 +1,3 @@
-Erro: Tipos incompativeis na linha5
+Nenhum erro foi encontrado!!!
+
+Analise semantica realizada com sucesso
