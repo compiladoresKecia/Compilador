@@ -84,7 +84,7 @@ public class Syntax {
     /**
      * tipo da variavel para analise semantica.
      */
-    private int tipo, tipo_ID, tipo_temporario;
+    private int tipo, tipo_MOSTLEFT, tipo_temporario;
 
     /**
      * Word (lexema) atual para analise semantica.
@@ -341,8 +341,7 @@ public class Syntax {
     private void stmt() {
         switch (this.token.getTag()) {
             case Tag.ID:
-                this.semantic = new Semantics(this.current, Tag.ID, this.token.toString());
-                tipo_ID = semantic.tipoIDLexema(this.token.toString());
+                this.semantic = new Semantics(this.current, Tag.ID, this.token.toString());                
                 adicionarElemento(this.semantic.Absence());
                 assignStmt();
                 break;
@@ -368,6 +367,7 @@ public class Syntax {
     private void assignStmt() {
         switch (this.token.getTag()) {
             case Tag.ID:
+                tipo_MOSTLEFT = semantic.tipoIDLexema(this.token.toString());
                 eat(Tag.ID);
                 eat(Tag.ATRIB);
                 simpleExpr1();
@@ -475,10 +475,18 @@ public class Syntax {
             case Tag.NOT:
             case Tag.MINUS:
             case Tag.AP:
+                simpleExpr1();
+                expression();
+                break;
             case Tag.INTEIRO:
             case Tag.LITERAL:
             case Tag.FLUTUANTE:
-            case Tag.ID:
+                tipo_MOSTLEFT = this.token.getTag();
+                simpleExpr1();
+                expression();
+                break;
+            case Tag.ID:                
+                tipo_MOSTLEFT = semantic.tipoIDLexema(this.token.toString());
                 simpleExpr1();
                 expression();
                 break;
@@ -490,6 +498,7 @@ public class Syntax {
     private void expression() {
         if ((this.token.getTag() == Tag.EQ) || (this.token.getTag() == Tag.GT) || (this.token.getTag() == Tag.GE) || (this.token.getTag() == Tag.LT) || (this.token.getTag() == Tag.LE) || (this.token.getTag() == Tag.NEQ)) {
             relop();
+            adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             simpleExpr1();
         }
     }
@@ -499,12 +508,12 @@ public class Syntax {
             case Tag.ID:
                 adicionarElemento(this.semantic.Absence());
                 term1();
+                adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
                 simpleExpr();
                 break;
             case Tag.INTEIRO:
             case Tag.LITERAL:
             case Tag.FLUTUANTE:
-                this.semantic = new Semantics(this.current, this.token.getTag(), this.token.toString());
             case Tag.NOT:
             case Tag.MINUS:
             case Tag.AP:
@@ -520,6 +529,7 @@ public class Syntax {
         if ((this.token.getTag() == Tag.PLUS) || (this.token.getTag() == Tag.MINUS) || (this.token.getTag() == Tag.OR)) {
             addop();
             term1();
+            adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             simpleExpr();
         }
     }
@@ -545,6 +555,7 @@ public class Syntax {
         if ((this.token.getTag() == Tag.MULT) || (this.token.getTag() == Tag.DIV) || (this.token.getTag() == 268)) {
             mulop();
             factorA();
+            adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             term();
         }
     }
@@ -575,6 +586,7 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.ID:
                 //   adicionarElemento(this.semantic.TypeAssignment(this.token.toString(), 0));
+                tipo_temporario = semantic.tipoIDLexema(token.toString());                
                 eat(Tag.ID);
                 break;
             case Tag.INTEIRO:
@@ -660,7 +672,7 @@ public class Syntax {
                 eat(Tag.INTEIRO);
                 break;
             case Tag.LITERAL:
-               tipo_temporario = Tag.INTEIRO;
+                tipo_temporario = Tag.LITERAL;
                 eat(Tag.LITERAL);
                 break;
             case Tag.FLUTUANTE:

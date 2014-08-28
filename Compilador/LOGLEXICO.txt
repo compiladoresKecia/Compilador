@@ -111,12 +111,12 @@ Linha	Lexema		Valor
   20      exit		257
 
 	**Identificadores**
+ e
+ c
+ l
+ a
  d
  b
- e
- l
- c
- a
 	**Palavras Reservadas**
  start
  int
