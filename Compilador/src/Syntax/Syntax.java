@@ -608,10 +608,12 @@ public class Syntax {
             case Tag.NOT:
                 eat(Tag.NOT);
                 factor();
+                generatorCode.adicionarNot();
                 break;
             case Tag.MINUS:
                 eat(Tag.MINUS);
                 factor();
+                generatorCode.adicionarMinus();
                 break;
             default:
                 erro();

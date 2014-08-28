@@ -136,6 +136,16 @@ public class generatorCode {
         
         incrementaIndiceTemporario();
     }
+    public void adicionarNot(){
+        code.add(new TreeAdressLine(Tag.NOT, argumentTemporario, null,temporario[indiceTemporario] ));
+        this.argumentTemporario = temporario[indiceTemporario];
+        incrementaIndiceTemporario();    
+    }
+    public void adicionarMinus(){
+        code.add(new TreeAdressLine(Tag.MINUS, argumentTemporario, null,temporario[indiceTemporario] ));
+        this.argumentTemporario = temporario[indiceTemporario];
+        incrementaIndiceTemporario();    
+    }
 
     public void adicionarIFStatement() {
         code.add(new TreeAdressLine(Tag.IF, temporario[indiceTemporario-1] 
