@@ -392,9 +392,11 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.IF:
                 eat(Tag.IF);
-                condition();
+                condition();                
                 eat(Tag.THEN);
-                stmtList();
+                generatorCode.adicionarIFStatement();
+                stmtList();                
+                generatorCode.inserirLinhaRotuloIF();
                 elseStmt();
                 break;
             default:
@@ -404,6 +406,8 @@ public class Syntax {
 
     private void elseStmt() {
         if (this.token.getTag() == Tag.ELSE) {
+            generatorCode.adicionarElsetatement();
+            generatorCode.inserirLinhaRotuloELSE();
             eat(Tag.ELSE);
             stmtList();
         }
@@ -418,6 +422,7 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.DO:
                 eat(Tag.DO);
+                generatorCode.setLinhaRetorno();
                 stmtList();
                 stmtSufix();
                 break;
@@ -430,8 +435,9 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.WHILE:
                 eat(Tag.WHILE);
-                condition();
+                condition();                
                 eat(Tag.END);
+                generatorCode.adicionarWhile();
                 break;
             default:
                 erro();
@@ -475,6 +481,7 @@ public class Syntax {
                 simpleExpr1();
                 break;
             case Tag.LITERAL:
+                generatorCode.setArgumentTemporario(this.token.toString());
                 eat(Tag.LITERAL);
                 break;
             case 293:

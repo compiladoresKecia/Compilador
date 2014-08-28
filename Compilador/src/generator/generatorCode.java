@@ -49,6 +49,22 @@ public class generatorCode {
      * Resultado da linha do codigo.
      */
     private String resultFinal;
+    /**
+     * Linha do codigo DO-WHILE para carregar.
+     */
+    private int linhaRetorno;
+    /**
+     * Lista dos falselist para os IFs.
+     */
+    private Stack pilhaRotulosParaIF;
+    
+    /**
+     * Lista dos falselist para os ELSEs.
+     */
+    private Stack pilhaRotulosParaELSEs;
+    
+    
+    
 
     private final int max_Indice = 31;
 
@@ -67,9 +83,11 @@ public class generatorCode {
     public generatorCode() {
         code = new LinkedList<>();        
         indiceTemporario = 0;
+        linhaRetorno = 0;
         pilhaArg = new Stack<>();
         operatorStack = new Stack<>();
-        
+        pilhaRotulosParaIF = new Stack<>();
+        pilhaRotulosParaELSEs = new Stack<>();        
     }
     public void limparPilhas(){
         indiceTemporario = 0;
@@ -117,7 +135,14 @@ public class generatorCode {
     }
 
     public void adicionarIFStatement() {
-
+        code.add(new TreeAdressLine(Tag.IF, temporario[indiceTemporario-1] 
+                , null, "goto "+ code.size()+2));
+        code.add(new TreeAdressLine(0, null, null, "goto LABEL_PILHA_IF"));
+    }
+    public void adicionarElsetatement(){
+        code.add(new TreeAdressLine(Tag.ELSE, temporario[indiceTemporario-1] 
+                , null, "goto "+ code.size()+1));
+        code.add(new TreeAdressLine(0, null, null, "goto LABEL_PILHA_ELSE"));
     }
     
     public void adicionarLadoEsquerdoCondicao(){
@@ -137,6 +162,10 @@ public class generatorCode {
 
     public void adicionarCodigo(int tag) {
         code.add(new TreeAdressLine(tag, this.argumentTemporario, null, null));
+        limparPilhas();
+    }
+    public void adicionarWhile(){
+        code.add(new TreeAdressLine(Tag.IF, temporario_Condicao[Lado_Condicao],null,"goto "+linhaRetorno));
         limparPilhas();
     }
 
@@ -196,6 +225,21 @@ public class generatorCode {
     public void setCondicionalOperador(int condicionalOperador) {
         this.condicionalOperador = condicionalOperador;
     }
+
+    public int getLinhaRetorno() {
+        return linhaRetorno;
+    }
+
+    public void setLinhaRetorno() {
+        linhaRetorno = code.size();
+    }
+    public void inserirLinhaRotuloIF(){
+        pilhaRotulosParaIF.push(code.size());
+    }
+    public void inserirLinhaRotuloELSE(){
+        pilhaRotulosParaELSEs.push(code.size());
+    }
+    
     
 
 }
