@@ -246,7 +246,9 @@ public class generatorCode {
         TreeAdressLine codigo_Aux;
         while (!code.isEmpty()){
             codigo_Aux = code.pop();
-            
+            if(codigo_Aux.getOperator()==Tag.PLUS){
+                
+            }
             
         }
     }
@@ -256,10 +258,49 @@ public class generatorCode {
             case Tag.PLUS:
                 return "ADD";
                 
+            case Tag.MINUS:
+                return "SUB";
+                
+            case Tag.DIV:
+                return "DIV";
+                
+            /*case Tag.NOT:
+                return "NOT";*/
+                
+            case Tag.EQ:
+                return "EQUAL";                
+                
                 }
         return null;
     }
     
+    public String operacaoFlutuante(int operacao){
+        switch(operacao){
+            case Tag.PLUS:
+                return "FADD";
+                
+            case Tag.MINUS:
+                return "FSUB";
+                
+            case Tag.DIV:
+                return "FDIV";
+                
+            /*case Tag.NOT:
+                return "NOT";*/
+                
+            case Tag.EQ:
+                return "FEQUAL";                
+                }
+        return null;
+    }
     
-
+    public String operacaoString(int operacao){
+        switch(operacao){
+            case Tag.PLUS:
+                return "CONCAT";
+        }
+        return null;
+    }
+    
+    
 }
