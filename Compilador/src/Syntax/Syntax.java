@@ -207,6 +207,9 @@ public class Syntax {
         gravarBufferSemantico();
         if (strBufferSemantico.length() == 0) {
             strBufferSemantico.append("Nenhum erro foi encontrado!!!\n\nAnalise semantica realizada com sucesso");
+            if (!this.DeuErro){
+                generatorCode.gerarCodigo();
+            }
         }
         this.lexer.gravarSemantico(this.strBufferSemantico);
 

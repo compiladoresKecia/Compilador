@@ -5,6 +5,7 @@
  */
 package generator;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Stack;
 import lexer.Tag;
@@ -56,15 +57,17 @@ public class generatorCode {
     /**
      * Lista dos falselist para os IFs.
      */
-    private Stack pilhaRotulosParaIF;
+    private Stack<Integer> pilhaRotulosParaIF;
     
     /**
      * Lista dos falselist para os ELSEs.
      */
-    private Stack pilhaRotulosParaELSEs;
+    private Stack<Integer> pilhaRotulosParaELSEs;
     
-    
-    
+    /**
+     * Buffer para o codigo vm
+     */
+    private StringBuffer strBuffer_VM;
 
     private final int max_Indice = 31;
 
@@ -238,6 +241,23 @@ public class generatorCode {
     }
     public void inserirLinhaRotuloELSE(){
         pilhaRotulosParaELSEs.push(code.size());
+    }
+    public void gerarCodigo(){
+        TreeAdressLine codigo_Aux;
+        while (!code.isEmpty()){
+            codigo_Aux = code.pop();
+            
+            
+        }
+    }
+    
+    public String operacaoInteiro(int operacao){
+        switch(operacao){
+            case Tag.PLUS:
+                return "ADD";
+                
+                }
+        return null;
     }
     
     
