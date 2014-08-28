@@ -56,6 +56,11 @@ public class generatorCode {
         "t7", "t8", "t9", "t10", "t11", "t12", "t13", "t14", "t15", "t16",
         "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26",
         "t27", "t28", "t29", "t30", "t31", "t32"};
+    
+    private final static int Lado_Esquerdo = 0,Lado_Direito = 1,Lado_Condicao = 2;
+    private final String temporario_Condicao[] ={"tl","tr","tCo"};
+    
+    private int condicionalOperador;
 
     private int indiceTemporario;
 
@@ -66,6 +71,11 @@ public class generatorCode {
         operatorStack = new Stack<>();
         
     }
+    public void limparPilhas(){
+        indiceTemporario = 0;
+        pilhaArg = new Stack<>();
+        operatorStack = new Stack<>();
+    }
     public void adicionarAtrib() {
         if (indiceTemporario > 0) {
             code.add(new TreeAdressLine(Tag.ATRIB, temporario[indiceTemporario - 1], null, resultFinal));
@@ -73,6 +83,7 @@ public class generatorCode {
         } else {
             code.add(new TreeAdressLine(Tag.ATRIB, argumentTemporario, null, resultFinal));
         }
+        limparPilhas();
     }
 
     public void incrementaIndiceTemporario() {
@@ -108,14 +119,25 @@ public class generatorCode {
     public void adicionarIFStatement() {
 
     }
+    
+    public void adicionarLadoEsquerdoCondicao(){
+        code.add(new TreeAdressLine(Tag.ATRIB,temporario[indiceTemporario-1] , null, temporario_Condicao[Lado_Esquerdo]));
+        limparPilhas();
+    }
 
-    public void adicionarCondicao(int indice_Temporario) {
+    public void adicionarCondicao() {
+        code.add(new TreeAdressLine(Tag.ATRIB,temporario[indiceTemporario-1] , null, temporario_Condicao[Lado_Direito]));
+        code.add(new TreeAdressLine(operatorTemporario, 
+                temporario_Condicao[Lado_Esquerdo], 
+                temporario_Condicao[Lado_Direito],
+                temporario_Condicao[Lado_Condicao]));
+        limparPilhas();
 
     }
 
     public void adicionarCodigo(int tag) {
         code.add(new TreeAdressLine(tag, this.argumentTemporario, null, null));
-
+        limparPilhas();
     }
 
     public LinkedList<TreeAdressLine> getCode() {
@@ -166,5 +188,14 @@ public class generatorCode {
     public void setIndiceTemporario(int indiceTemporario) {
         this.indiceTemporario = indiceTemporario;
     }
+
+    public int getCondicionalOperador() {
+        return condicionalOperador;
+    }
+
+    public void setCondicionalOperador(int condicionalOperador) {
+        this.condicionalOperador = condicionalOperador;
+    }
+    
 
 }

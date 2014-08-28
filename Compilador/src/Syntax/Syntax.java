@@ -84,7 +84,7 @@ public class Syntax {
     /**
      * tipo da variavel para analise semantica.
      */
-    private int tipo, tipo_MOSTLEFT, tipo_temporario, indice_Temporario,operador_Expressao;
+    private int tipo, tipo_MOSTLEFT, tipo_temporario, indice_Temporario;
 
     /**
      * Word (lexema) atual para analise semantica.
@@ -441,7 +441,6 @@ public class Syntax {
     private void readStmt() {
         switch (this.token.getTag()) {
             case Tag.SCAN:
-                generatorCode.setOperatorTemporario(Tag.SCAN);
                 eat(Tag.SCAN);
                 eat(Tag.AP);
                 identifier();
@@ -489,7 +488,7 @@ public class Syntax {
             case Tag.NOT:
             case Tag.MINUS:
             case Tag.AP:
-                simpleExpr1();
+                simpleExpr1();                
                 expression();
                 break;
             case Tag.INTEIRO:
@@ -511,12 +510,12 @@ public class Syntax {
 
     private void expression() {
         if ((this.token.getTag() == Tag.EQ) || (this.token.getTag() == Tag.GT) || (this.token.getTag() == Tag.GE) || (this.token.getTag() == Tag.LT) || (this.token.getTag() == Tag.LE) || (this.token.getTag() == Tag.NEQ)) {
-            operador_Expressao = this.token.getTag();
-            indice_Temporario = generatorCode.getIndiceTemporario();
+            generatorCode.setCondicionalOperador(this.token.getTag());
+            generatorCode.adicionarLadoEsquerdoCondicao();
             relop();
             simpleExpr1();
             adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
-            generatorCode.adicionarCondicao(indice_Temporario);
+            generatorCode.adicionarCondicao();
             
         }
     }
