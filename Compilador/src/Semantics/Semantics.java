@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import lexer.Lexer;
+import lexer.Tag;
 import lexer.Word;
 
 public class Semantics
@@ -28,7 +29,10 @@ public class Semantics
     this.lexema = lexema;
     idVazio = new Identificador(0);
   }
-  
+  /**
+   * Declarar tipo e verificar unicidade.
+   * @return 
+   */
   public String Type()
   {
     System.out.println("Tipo");
@@ -60,7 +64,10 @@ public class Semantics
     
     return erro;
   }
-  
+  /**
+   * Ausencia de tipo.
+   * @return 
+   */
   public String Absence()
   {
     String erro = null;
@@ -73,7 +80,7 @@ public class Semantics
     while (iterator.hasNext())
     {
       Word palavra = (Word)iterator.next();
-      if ((palavra.getTag() == 294) && (this.lexema.equals(palavra.toString()))) {
+      if ((palavra.getTag() == Tag.ID) && (this.lexema.equals(palavra.toString()))) {
         if (palavra.getType() == null)
         {
           System.out.println("\n\nErro semantico! ");
@@ -87,7 +94,10 @@ public class Semantics
     }
     return erro;
   }
-  
+  /**
+   * Unicidade.
+   * @return 
+   */
   public String Unicity()
   {
     this.linha = Lexer.getLinhaID();
@@ -103,7 +113,7 @@ public class Semantics
     while (iterator.hasNext())
     {
       Word palavra = (Word)iterator.next();
-      if ((palavra.getTag() == 294) && (palavra.toString().equals(lexema))) {
+      if ((palavra.getTag() == Tag.ID) && (palavra.toString().equals(lexema))) {
         return palavra;
       }
     }
@@ -122,30 +132,43 @@ public class Semantics
   {
     switch (tipoAnalise)
     {
-    case 290: 
+    case Tag.INTEIRO: 
       this._tipo = "INT";
       break;
-    case 291: 
+    case Tag.LITERAL: 
       this._tipo = "STRING";
       break;
-    case 292: 
+    case Tag.FLUTUANTE: 
       this._tipo = "FLOAT";
     }
     return this._tipo;
   }
   
+  public int tipoIDLexema(String lexema){
+      if(lexema != null){
+          
+      }
+      return -1;
+  }
+  
+  
+  
+  
+  
+  
+  /*
   public String TypeAssignment(String lexema, int tag)
   {
     String erro = null;
     this.linha = Lexer.getLinhaID();
-    if (this.word.getTag() == 294) {
+    if (this.word.getTag() == Tag.ID) {
       this.word = consultLexemaEnviroment(this.word.toString());
     }
     if (lexema != null)
     {
       System.out.println("Word leftside: " + lexema + "\n Word :" + this.word.toString());
       Word leftSide = consultLexemaEnviroment(lexema);
-      if (leftSide != null && tipo == 294)
+      if (leftSide != null && tipo == Tag.ID)
       {
         if (this.word.getType() == null )
         {
@@ -182,7 +205,7 @@ public class Semantics
       }
       
     }
-    else if ((this.word.getType() == null) && (this.tipo == 294))
+    else if ((this.word.getType() == null) && (this.tipo == Tag.ID))
     {
       System.out.println("\n\nErro semantico! ");
       System.out.println("\nVariavel [" + this.word.toString() + "] foi utilizada mas NAO foi declarada." + "\nLinha: " + this.linha + "\n\n");
@@ -191,7 +214,7 @@ public class Semantics
       erro = "\nVariavel [" + this.word.toString() + "] foi utilizada mas NAO foi declarada." + "\nLinha: " + this.linha + "\n\n";
       return erro;
     }
-    else if (this.tipo == 294)
+    else if (this.tipo == Tag.ID)
     {
       String typ = tipo(tag);
       if (this.word.getType().equals(typ))
@@ -209,7 +232,7 @@ public class Semantics
         return erro;
       }
     }
-    else if (this.tipo != 294)
+    else if (this.tipo != Tag.ID)
     {
       String tipoComparacao = tipo(this.tipo);
       String typ = tipo(tag);
@@ -229,5 +252,5 @@ public class Semantics
       }
     }
     return erro;
-  }
+  }*/
 }

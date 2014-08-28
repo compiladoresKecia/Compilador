@@ -1,5 +1,3 @@
+Nenhum erro foi encontrado!!!
 
-Variavel [out] foi utilizada mas NAO foi declarada.
-Linha: 23
-
-
+Analise semantica realizada com sucesso

@@ -20,6 +20,6 @@ sobrenome + "!";
 		a = aux;
 	end
 	print ("Apos a troca: ");
-	out(a);
-	out(b)
+	print(a);
+	print(b)
 exit

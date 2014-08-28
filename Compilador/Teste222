@@ -1,7 +1,8 @@
 start
 
-	int a, c;
+	int a, b, c;
 	float d, e;
+	string l;
 	a = 0; d = 3.5;
 	c = d / 1.2;
 	scan (a);
@@ -11,8 +12,9 @@ start
 	print ("Resultado: ");
 	print (c);
 	d = 34.2;
-	e = val + 2.2;
+	e = c + 2.2;
 	print ("E: ");
 	print (e);
 	a = (b + c + d)/2;
+	a = l;
 exit
