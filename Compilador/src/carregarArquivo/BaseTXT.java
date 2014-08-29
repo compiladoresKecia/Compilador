@@ -17,6 +17,7 @@ public class BaseTXT
   private FileWriter arquivoGravar;
   private FileWriter arquivoGravarSintatico;
   private FileWriter arquivoGravarSemantico;
+  private FileWriter arquivoCodigo;
   
   public BaseTXT()
   {
@@ -26,6 +27,7 @@ public class BaseTXT
       this.arquivoGravar = new FileWriter("LOGLEXICO.txt", false);
       this.arquivoGravarSintatico = new FileWriter("LOGSINTATICO.txt", false);
       this.arquivoGravarSemantico = new FileWriter("LOGSEMANTICO.txt", false);
+      this.arquivoCodigo = new FileWriter("codigo.vm",false);
     }
     catch (IOException ex)
     {
@@ -96,6 +98,12 @@ public class BaseTXT
   public void escreverArquivoSemantico(StringBuffer stBuffer)
   {
     PrintWriter escreve_linha = new PrintWriter(this.arquivoGravarSemantico, true);
+    escreve_linha.println(stBuffer.toString());
+    escreve_linha.close();
+  }
+   public void escreverArquivoCodigo(StringBuffer stBuffer)
+  {
+    PrintWriter escreve_linha = new PrintWriter(this.arquivoCodigo, true);
     escreve_linha.println(stBuffer.toString());
     escreve_linha.close();
   }
