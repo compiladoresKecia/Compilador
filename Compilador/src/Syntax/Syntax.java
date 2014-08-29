@@ -526,6 +526,7 @@ public class Syntax {
             simpleExpr1();
             adicionarElemento(semantic.TypeAssignment(tipo_MOSTLEFT, tipo_temporario));
             generatorCode.adicionarCondicao();
+            generatorCode.inserirTipoCondicao(tipo_MOSTLEFT);
             
         }
     }

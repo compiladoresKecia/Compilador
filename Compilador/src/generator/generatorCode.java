@@ -87,6 +87,8 @@ public class generatorCode {
 
     private int indiceTemporario;
 
+    private LinkedList<Integer> tipoCondicao;
+
     public generatorCode() {
 
         code = new LinkedList<>();
@@ -96,6 +98,7 @@ public class generatorCode {
         operatorStack = new Stack<>();
         pilhaRotulosParaIF = new Stack<>();
         pilhaRotulosParaELSEs = new Stack<>();
+        tipoCondicao = new LinkedList();
     }
 
     public void limparPilhas() {
@@ -266,16 +269,25 @@ public class generatorCode {
         pilhaRotulosParaELSEs.push(code.size());
     }
 
+    public void inserirTipoCondicao(int tipo) {
+        tipoCondicao.push(tipo);
+    }
+
     public void gerarCodigo() {
         TreeAdressLine codigo_Aux;
         Word wordAux, wordResult;
         String aux, rsult;
         String arg1, arg2;
-        int offset_Aux = Ambiente.gerarIdentificador().getOffset();
+        int offset_Max = Ambiente.gerarIdentificador().getOffset();
+        int offset_Aux;
+        aux = "START";
+        strBuffer_VM.append(aux);
+        //+2 = LADO ESQUERDO E DIREITO
+        aux = "PUSHN " + offset_Max + 2;
+        //adiciona a linha de comando aux
+        strBuffer_VM.append(aux);
         while (!code.isEmpty()) {
-            aux = "PUSHN " + offset_Aux;
-            //adiciona a linha de comando aux
-            strBuffer_VM.append(aux);
+
             codigo_Aux = code.pop();
             rsult = codigo_Aux.getResult();
             wordResult = Ambiente.getPeloLexema(rsult);
@@ -284,11 +296,12 @@ public class generatorCode {
                     wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1().toString());
                     // caso o primeiro argumento nao for id wordaux eh nullo
                     if (wordAux == null) {
-                        // Se nao for um terminal carregue seu valor com PUSH
+                        // Se nao for um terminal carregue seu valor com o PUSH
                         if (!containsTemporarioQualquer(codigo_Aux.getArgument1().toString())) {
                             aux = atribuicaoTipo(wordResult.getType()) + codigo_Aux.getArgument1();
                             strBuffer_VM.append(aux);
                         }
+                        //CARREGA O TOPO NA PILHA
                         aux = "STOREG " + Ambiente.getOffsetPeloLexema(wordResult.lexeme);
                         strBuffer_VM.append(aux);
                     }//caso wordaux eh id faca
@@ -312,9 +325,81 @@ public class generatorCode {
                         || codigo_Aux.getOperator() == Tag.LE
                         || codigo_Aux.getOperator() == Tag.LT
                         || codigo_Aux.getOperator() == Tag.NEQ) {
+                    arg1 = codigo_Aux.getArgument1().toString();
+                    if (codigo_Aux.getArgument2() != null) {
+                        arg2 = codigo_Aux.getArgument2().toString();
+                        //TEMPORARIO = CONSTANT OPERACAO CONSTANT
+                        if (!containsTemporarioQualquer(arg1) && !containsTemporarioQualquer(arg2)) {
+                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument1().getTag()) + codigo_Aux.getArgument1().toString();
+                            strBuffer_VM.append(aux);
+                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument2().getTag()) + codigo_Aux.getArgument2().toString();
+                            strBuffer_VM.append(aux);
+                            aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
+                            strBuffer_VM.append(aux);
+                        }
+                        //TEMPORARIO = CONSTANT OPERACAO TEMPORARIO
+                        if (!containsTemporarioQualquer(arg1) && containsTemporario(arg2)) {
+                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument1().getTag()) + codigo_Aux.getArgument1().toString();
+                            strBuffer_VM.append(aux);
+                            aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
+                            strBuffer_VM.append(aux);
+                        }
+                        //TEMPORARIO = TEMPORARIO OPERACAO TEMPORARIO
+                        else if (temporario_Condicao[Lado_Condicao].toString().equals(codigo_Aux.getResult())) {
+                            // LADO condicao
+                            int tipo_condicao = tipoCondicao.pop();
+                            
+                            aux = "PUSHG " + offset_Max + 1;
+                            strBuffer_VM.append(aux);
+                            
+                            aux = "PUSHG " + offset_Max + 2;
+                            strBuffer_VM.append(aux);
+                            aux = getOperacaoTipo(tipo_condicao, codigo_Aux.getOperator());
+                            strBuffer_VM.append(aux);
+                            
+                        } 
+                        
+                    }
 
+                } else if (temporario_Condicao[Lado_Esquerdo].toString().equals(codigo_Aux.getResult())) {
+                    // LADO ESQUERDO CONDICIONAL
+                    aux = "STOREG " + offset_Max + 1;
+                    strBuffer_VM.append(aux);
+                } else if (temporario_Condicao[Lado_Direito].toString().equals(codigo_Aux.getResult())) {
+                    // LADO DIREITO CONDICIONAL
+                    aux = "STOREG " + offset_Max + 2;
+                    strBuffer_VM.append(aux);
                 }
+
             }
+        }
+    }
+
+    public String atribuicaoConstanteTipo(int tag) {
+        switch (tag) {
+            case Tag.INTEIRO:
+                return "PUSHI ";
+            case Tag.FLUTUANTE:
+                return "PUSHF ";
+            case Tag.LITERAL:
+                return "PUSHS ";
+            default:
+                return null;
+
+        }
+    }
+
+    public String getOperacaoTipo(int tag, int operacao) {
+        switch (tag) {
+            case Tag.INTEIRO:
+                return operacaoInteiro(operacao);
+            case Tag.FLUTUANTE:
+                return operacaoFlutuante(operacao);
+            case Tag.LITERAL:
+                return operacaoString(operacao);
+            default:
+                return null;
+
         }
     }
 
@@ -362,7 +447,7 @@ public class generatorCode {
                 return "INF";
 
             case Tag.NEQ:
-                return "NOT";
+                return "NOT \n EQUAL";
 
         }
         return null;
