@@ -194,6 +194,10 @@ public class generatorCode {
         code.add(new TreeAdressLine(Tag.IF, temporario_Condicao[Lado_Condicao], null, "goto " + linhaRetorno));
         limparPilhas();
     }
+    public void adicionarDo() {
+        code.add(new TreeAdressLine(Tag.DO, null, null, null));
+        limparPilhas();
+    }
 
     public LinkedList<TreeAdressLine> getCode() {
         return code;
@@ -282,8 +286,8 @@ public class generatorCode {
         int offset_Aux;
         aux = "START";
         strBuffer_VM.append(aux);
-        //+2 = LADO ESQUERDO E DIREITO
-        aux = "PUSHN " + offset_Max + 2;
+        //+3 = LADO ESQUERDO E DIREITO e CONDICAO
+        aux = "PUSHN " + offset_Max + 3;
         //adiciona a linha de comando aux
         strBuffer_VM.append(aux);
         while (!code.isEmpty()) {
@@ -349,12 +353,14 @@ public class generatorCode {
                             // LADO condicao
                             int tipo_condicao = tipoCondicao.pop();
                             
-                            aux = "PUSHG " + offset_Max + 1;
+                            aux = "PUSHG " + (offset_Max + 1);
                             strBuffer_VM.append(aux);
                             
-                            aux = "PUSHG " + offset_Max + 2;
+                            aux = "PUSHG " + (offset_Max + 2);
                             strBuffer_VM.append(aux);
                             aux = getOperacaoTipo(tipo_condicao, codigo_Aux.getOperator());
+                            strBuffer_VM.append(aux);
+                            aux = "STOREG " + (offset_Max + 3);
                             strBuffer_VM.append(aux);
                             
                         } 
@@ -363,13 +369,20 @@ public class generatorCode {
 
                 } else if (temporario_Condicao[Lado_Esquerdo].toString().equals(codigo_Aux.getResult())) {
                     // LADO ESQUERDO CONDICIONAL
-                    aux = "STOREG " + offset_Max + 1;
+                    aux = "STOREG " + (offset_Max + 1);
                     strBuffer_VM.append(aux);
                 } else if (temporario_Condicao[Lado_Direito].toString().equals(codigo_Aux.getResult())) {
                     // LADO DIREITO CONDICIONAL
-                    aux = "STOREG " + offset_Max + 2;
+                    aux = "STOREG " + (offset_Max + 2);
                     strBuffer_VM.append(aux);
+                } else if (codigo_Aux.getOperator() == Tag.IF){
+                    aux = "PUSHG "+(offset_Max + 3);
+                    strBuffer_VM.append(aux);
+                    aux = "JZ LABEL_PREENCHER";
+                }else if (codigo_Aux.getOperator() == Tag.ELSE){
+                    
                 }
+                
 
             }
         }

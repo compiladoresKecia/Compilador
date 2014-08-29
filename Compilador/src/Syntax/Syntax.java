@@ -424,7 +424,9 @@ public class Syntax {
     private void whileStmt() {
         switch (this.token.getTag()) {
             case Tag.DO:
+                
                 eat(Tag.DO);
+                generatorCode.adicionarDo();
                 generatorCode.setLinhaRetorno();
                 stmtList();
                 stmtSufix();
