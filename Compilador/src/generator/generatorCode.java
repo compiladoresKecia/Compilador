@@ -96,7 +96,7 @@ public class generatorCode {
     private LinkedList<Integer> tipoCondicao;
 
     public generatorCode() {
-        indiceRotulos = 0 ;
+        indiceRotulos = 0;
         indiceRotulosElses = 0;
         code = new LinkedList<>();
         indiceTemporario = 0;
@@ -171,6 +171,7 @@ public class generatorCode {
     public void adicionarIFStatement() {
         code.add(new TreeAdressLine(Tag.IF, temporario, null, "IF"));
     }
+
     public void adicionarENDStatement() {
         code.add(new TreeAdressLine(Tag.END, temporario, null, "IF"));
         indiceRotulos++;
@@ -178,8 +179,9 @@ public class generatorCode {
 
     public void adicionarElsetatement() {
         code.add(new TreeAdressLine(Tag.ELSE, temporario, null, "ELSE"));
-        
+
     }
+
     public void adicionarENDELSEStatement() {
         code.add(new TreeAdressLine(Tag.END, temporario, null, "ELSE"));
         indiceRotulosElses++;
@@ -215,18 +217,16 @@ public class generatorCode {
         limparPilhas();
     }
 
-    
-    public void adicionarRead(){
+    public void adicionarRead() {
         code.add(new TreeAdressLine(Tag.SCAN, argumentTemporario, null, temporario.toString()));
         this.argumentTemporario = temporario;
         incrementaIndiceTemporario();
     }
-    
-    public void adicionarWrite(){
-        
+
+    public void adicionarWrite() {
+
     }
-    
-    
+
     public LinkedList<TreeAdressLine> getCode() {
         return code;
     }
@@ -293,7 +293,6 @@ public class generatorCode {
         linhaRetorno = code.size();
     }
 
-   
     public void inserirTipoCondicao(int tipo) {
         tipoCondicao.push(tipo);
     }
@@ -399,40 +398,42 @@ public class generatorCode {
                 } else if (codigo_Aux.getOperator() == Tag.IF) {
                     aux = "PUSHG " + (offset_Max + 3);
                     strBuffer_VM.append(aux);
-                    aux = "NOT";
-                    strBuffer_VM.append(aux);
-                    if (codigo_Aux.getResult().equals("while")) {                        
-                        aux = "JZ "+pilhaRotulosParaWHILES.pop();
+
+                    if (codigo_Aux.getResult().equals("while")) {
+                        aux = "JZ " + pilhaRotulosParaWHILES.pop();
                         strBuffer_VM.append(aux);
-                    }
-                    else{
-                        aux = "JZ "+pilhaRotulosParaIF.pop();
+                    } else {
+                        aux = "JZ " + "B" + indiceRotulos + ":";
+                        pilhaRotulosParaIF.add("B" + indiceRotulos + ":");
+                        indiceRotulos--;
                         strBuffer_VM.append(aux);
+
                     }
                 } else if (codigo_Aux.getOperator() == Tag.ELSE) {
-                    aux = "PUSHG " + (offset_Max + 3);
+                    aux = pilhaRotulosParaIF.pop();
                     strBuffer_VM.append(aux);
-                    aux = "JZ "+pilhaRotulosParaELSEs.pop();
-                        strBuffer_VM.append(aux);
-                }
-                else if(codigo_Aux.getOperator() == Tag.DO){
+                } else if (codigo_Aux.getOperator() == Tag.DO) {
                     addr++;
-                    aux = "A"+addr+":";
+                    aux = "A" + addr + ":";
                     strBuffer_VM.append(aux);
                     pilhaRotulosParaWHILES.add(aux);
-                }
-                else if(codigo_Aux.getOperator() == Tag.END && codigo_Aux.getResult()=="IF"){                    
-                    aux = "B"+indiceRotulos+":";
-                    indiceRotulos--;
-                    strBuffer_VM.append(aux);
-                    pilhaRotulosParaIF.add(aux);
-                }else if(codigo_Aux.getOperator() == Tag.END && codigo_Aux.getResult()=="ELSE"){                    
-                    aux = "C"+indiceRotulosElses+":";
-                    indiceRotulosElses--;
-                    strBuffer_VM.append(aux);
-                    pilhaRotulosParaELSEs.add(aux);
-                }
+                } else if (codigo_Aux.getOperator() == Tag.END && "IF".equals(codigo_Aux.getResult())) {
+                    if (!"ELSE".equals(code.peekFirst().getResult())) {
+                        aux = pilhaRotulosParaIF.pop();
+                        strBuffer_VM.append(aux);
+                    }
+                    else{                        
+                        aux = "JUMP "+"B"+indiceRotulosElses+":";
+                        pilhaRotulosParaELSEs.add("B"+indiceRotulosElses+":");                    
+                        indiceRotulosElses--;
+                        strBuffer_VM.append(aux);
+                    }
 
+                } else if (codigo_Aux.getOperator() == Tag.END && 
+                        "ELSE".equals(codigo_Aux.getResult())) {                    
+                    strBuffer_VM.append(pilhaRotulosParaELSEs.pop());
+
+                }
 
             }
         }
@@ -558,7 +559,7 @@ public class generatorCode {
         }
         return null;
     }
-    
+
     public String operacaoSaidaInteiro(int operacao) {
         switch (operacao) {
             case Tag.PRINT:
@@ -566,7 +567,7 @@ public class generatorCode {
         }
         return null;
     }
-    
+
     public String operacaoSaidaFlutuante(int operacao) {
         switch (operacao) {
             case Tag.PRINT:
@@ -574,7 +575,7 @@ public class generatorCode {
         }
         return null;
     }
-    
+
     public String operacaoEntrada(int operacao) {
         switch (operacao) {
             case Tag.SCAN:
@@ -582,8 +583,6 @@ public class generatorCode {
         }
         return null;
     }
-    
-    
 
     public StringBuffer getStrBuffer_VM() {
         gerarCodigo();
