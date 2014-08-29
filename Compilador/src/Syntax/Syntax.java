@@ -106,6 +106,10 @@ public class Syntax {
      * Argumento auxiliar.
      */
     private Token argAux;
+    /**
+     * Gravacao.
+     */
+    private boolean flag;
     
     
     
@@ -208,7 +212,7 @@ public class Syntax {
         if (strBufferSemantico.length() == 0) {
             strBufferSemantico.append("Nenhum erro foi encontrado!!!\n\nAnalise semantica realizada com sucesso");
             if (!this.DeuErro){
-           //     generatorCode.gerarCodigo();
+                this.lexer.gravarArquivoCodigo(generatorCode.getStrBuffer_VM());
             }
         }
         this.lexer.gravarSemantico(this.strBufferSemantico);

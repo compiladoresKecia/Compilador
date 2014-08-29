@@ -2,8 +2,6 @@ package Semantics;
 
 import Environment.Ambiente;
 import Environment.id.Identificador;
-import java.io.PrintStream;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import lexer.Lexer;
@@ -106,10 +104,12 @@ public class Semantics {
     public Word consultLexemaEnviroment(String lexema) {
         Set<Word> words = Ambiente.gerarHashMap();
         Iterator<Word> iterator = words.iterator();
-        while (iterator.hasNext()) {
-            Word palavra = (Word) iterator.next();
-            if ((palavra.getTag() == Tag.ID) && (palavra.toString().equals(lexema))) {
-                return palavra;
+        if (lexema != null) {
+            while (iterator.hasNext()) {
+                Word palavra = (Word) iterator.next();
+                if ((palavra.getTag() == Tag.ID) && (palavra.toString().equals(lexema))) {
+                    return palavra;
+                }
             }
         }
         return null;

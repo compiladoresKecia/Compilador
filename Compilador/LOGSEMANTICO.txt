@@ -1,4 +1,3 @@
--> Tipo ja cadastrado!
-** Identificador: a
-**  Tipo = INT
+Nenhum erro foi encontrado!!!
 
+Analise semantica realizada com sucesso

@@ -107,6 +107,7 @@ public class generatorCode {
         pilhaRotulosParaELSEs = new Stack<>();
         tipoCondicao = new LinkedList();
         pilhaRotulosParaWHILES = new Stack();
+        strBuffer_VM = new StringBuffer();
     }
 
     public void limparPilhas() {
@@ -218,12 +219,12 @@ public class generatorCode {
     }
 
     public void adicionarRead() {
-        code.add(new TreeAdressLine(Tag.SCAN, argumentTemporario, null, temporario.toString()));
-        
+        code.add(new TreeAdressLine(Tag.SCAN, argumentTemporario, null, null));
+
     }
 
     public void adicionarWrite() {
-        code.add(new TreeAdressLine(Tag.PRINT, argumentTemporario, null, temporario.toString()));
+        code.add(new TreeAdressLine(Tag.PRINT, argumentTemporario, null, null));
     }
 
     public LinkedList<TreeAdressLine> getCode() {
@@ -299,42 +300,39 @@ public class generatorCode {
     public void gerarCodigo() {
         TreeAdressLine codigo_Aux;
         int addr = 0;
-        Word wordAux, wordResult;
+        Word wordAux, wordArg1, wordArg2, wordResult;
         String aux, rsult;
         String arg1, arg2;
-        int offset_Max = Ambiente.gerarIdentificador().getOffset();
+        int offset_Max = Ambiente.gerarIdentificador().getOffset() + 3;
         int offset_Aux;
-        aux = "START";
+        aux = "START" + "\n";
         strBuffer_VM.append(aux);
         //+3 = LADO ESQUERDO E DIREITO e CONDICAO
-        aux = "PUSHN " + offset_Max + 3;
+        aux = "PUSHN " + offset_Max + "\n";
         //adiciona a linha de comando aux
         strBuffer_VM.append(aux);
+        System.out.println("-------------------------------------");
         while (!code.isEmpty()) {
 
             codigo_Aux = code.pop();
             rsult = codigo_Aux.getResult();
             wordResult = Ambiente.getPeloLexema(rsult);
+            controle(codigo_Aux);
             if (wordResult != null) {
+
                 if (codigo_Aux.getOperator() == Tag.ATRIB) {
                     wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1().toString());
                     // caso o primeiro argumento nao for id wordaux eh nullo
-                    if (wordAux == null) {
+                    if (wordAux != null) {
                         // Se nao for um terminal carregue seu valor com o PUSH
                         if (!containsTemporarioQualquer(codigo_Aux.getArgument1().toString())) {
-                            aux = atribuicaoTipo(wordResult.getType()) + codigo_Aux.getArgument1();
+                            aux = atribuicaoTipo(wordResult.getType()) + codigo_Aux.getArgument1() + "\n";
                             strBuffer_VM.append(aux);
                         }
                         //CARREGA O TOPO NA PILHA
-                        aux = "STOREG " + Ambiente.getOffsetPeloLexema(wordResult.lexeme);
+                        aux = "STOREG " + Ambiente.getOffsetPeloLexema(wordResult.lexeme) + "\n";
                         strBuffer_VM.append(aux);
-                    }//caso wordaux eh id faca
-                    else {
-                        offset_Aux = Ambiente.table.get(wordAux).getOffset();
-                        aux = "PUSHG " + offset_Aux;
-                        strBuffer_VM.append(aux);
-                        aux = "STOREG " + Ambiente.getOffsetPeloLexema(codigo_Aux.getResult());
-                        strBuffer_VM.append(aux);
+
                     }
                 }
 
@@ -354,16 +352,37 @@ public class generatorCode {
                         arg2 = codigo_Aux.getArgument2().toString();
                         //TEMPORARIO = CONSTANT OPERACAO CONSTANT
                         if (!containsTemporarioQualquer(arg1) && !containsTemporarioQualquer(arg2)) {
-                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument1().getTag()) + codigo_Aux.getArgument1().toString();
-                            strBuffer_VM.append(aux);
-                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument2().getTag()) + codigo_Aux.getArgument2().toString();
-                            strBuffer_VM.append(aux);
-                            aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
-                            strBuffer_VM.append(aux);
+                            wordArg1 = Ambiente.getPeloLexema(arg1);
+                            wordArg2 = Ambiente.getPeloLexema(arg2);
+                            //TEMPORARIO = CONSTANT OPERACAO CONSTANT
+                            if (wordArg1 == null && wordArg2 == null) {
+                                aux = atribuicaoConstanteTipo(codigo_Aux.getArgument1().getTag()) + codigo_Aux.getArgument1().toString() + "\n";
+                                strBuffer_VM.append(aux);
+                                aux = atribuicaoConstanteTipo(codigo_Aux.getArgument2().getTag()) + codigo_Aux.getArgument2().toString() + "\n";
+                                strBuffer_VM.append(aux);
+                                aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
+                                strBuffer_VM.append(aux);
+                            }//TEMPORARIO = ID OPERACAO CONSTANT 
+                            else if (wordArg1 != null && wordArg2 == null) {
+                                aux = "PUSHG " + Ambiente.getOffsetPeloLexema(wordArg1.lexeme) + "\n";
+                                strBuffer_VM.append(aux);
+                                aux = atribuicaoConstanteTipo(codigo_Aux.getArgument2().getTag()) + codigo_Aux.getArgument2().toString() + "\n";
+                                strBuffer_VM.append(aux);
+                                aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
+                                strBuffer_VM.append(aux);
+                            } else if (wordArg1 != null && wordArg2 != null) {
+                                aux = "PUSHG " + Ambiente.getOffsetPeloLexema(wordArg1.lexeme) + "\n";
+                                strBuffer_VM.append(aux);
+                                aux = "PUSHG " + Ambiente.getOffsetPeloLexema(wordArg2.lexeme) + "\n";
+                                strBuffer_VM.append(aux);
+                                aux = getOperacaoTipoID(wordArg1.getType(), codigo_Aux.getOperator());
+                                strBuffer_VM.append(aux);
+                            }
+
                         }
                         //TEMPORARIO = CONSTANT OPERACAO TEMPORARIO
                         if (!containsTemporarioQualquer(arg1) && containsTemporario(arg2)) {
-                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument1().getTag()) + codigo_Aux.getArgument1().toString();
+                            aux = atribuicaoConstanteTipo(codigo_Aux.getArgument1().getTag()) + codigo_Aux.getArgument1().toString() + "\n";
                             strBuffer_VM.append(aux);
                             aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
                             strBuffer_VM.append(aux);
@@ -371,15 +390,16 @@ public class generatorCode {
                         else if (temporario_Condicao[Lado_Condicao].toString().equals(codigo_Aux.getResult())) {
                             // LADO condicao
                             int tipo_condicao = tipoCondicao.pop();
-
-                            aux = "PUSHG " + (offset_Max + 1);
+                            offset_Aux = (offset_Max + 1);
+                            aux = "PUSHG " + offset_Aux + "\n";
                             strBuffer_VM.append(aux);
-
-                            aux = "PUSHG " + (offset_Max + 2);
+                            offset_Aux = (offset_Max + 2);
+                            aux = "PUSHG " + offset_Aux + "\n";
                             strBuffer_VM.append(aux);
                             aux = getOperacaoTipo(tipo_condicao, codigo_Aux.getOperator());
                             strBuffer_VM.append(aux);
-                            aux = "STOREG " + (offset_Max + 3);
+                            offset_Aux = (offset_Max + 3);
+                            aux = "STOREG " + offset_Aux + "\n";
                             strBuffer_VM.append(aux);
 
                         }
@@ -388,47 +408,48 @@ public class generatorCode {
 
                 } else if (temporario_Condicao[Lado_Esquerdo].toString().equals(codigo_Aux.getResult())) {
                     // LADO ESQUERDO CONDICIONAL
-                    aux = "STOREG " + (offset_Max + 1);
+                    offset_Aux = (offset_Max + 1);
+                    aux = "STOREG " + offset_Aux + "\n";
                     strBuffer_VM.append(aux);
                 } else if (temporario_Condicao[Lado_Direito].toString().equals(codigo_Aux.getResult())) {
                     // LADO DIREITO CONDICIONAL
-                    aux = "STOREG " + (offset_Max + 2);
+                    offset_Aux = (offset_Max + 2);
+                    aux = "STOREG " + offset_Aux + "\n";
                     strBuffer_VM.append(aux);
                 } /**
-                 * -- SE T FOR FALSO GOTO ENDIF
-                 * ( SE TIVER UM ELSE )->ADICIONA
-                 * JUMP ELSEEND 
-                 * -- ENDIF (SETIVER UM IF )-> ENDIF <= ELSE
-                 *  ---ELSEEND
+                 * -- SE T FOR FALSO GOTO ENDIF ( SE TIVER UM ELSE )->ADICIONA
+                 * JUMP ELSEEND -- ENDIF (SETIVER UM IF )-> ENDIF <= ELSE
+                 * ---ELSEEND
                  */
                 else if (codigo_Aux.getOperator() == Tag.IF) {
-                    aux = "PUSHG " + (offset_Max + 3);
+                    offset_Aux = (offset_Max + 3);
+                    aux = "PUSHG " + offset_Aux + "\n";
                     strBuffer_VM.append(aux);
 
                     if (codigo_Aux.getResult().equals("while")) {
-                        aux = "JZ " + pilhaRotulosParaWHILES.pop();
+                        aux = "JZ " + pilhaRotulosParaWHILES.pop() + "\n";
                         strBuffer_VM.append(aux);
                     } else {
                         aux = "JZ " + "B" + indiceRotulos + ":";
-                        pilhaRotulosParaIF.add("B" + indiceRotulos + ":");
+                        pilhaRotulosParaIF.add("B" + indiceRotulos + ":" + "\n");
                         indiceRotulos--;
                         strBuffer_VM.append(aux);
 
                     }
                 } else if (codigo_Aux.getOperator() == Tag.ELSE) {
-                    aux = pilhaRotulosParaIF.pop();
+                    aux = pilhaRotulosParaIF.pop() + "\n";
                     strBuffer_VM.append(aux);
                 } else if (codigo_Aux.getOperator() == Tag.DO) {
                     addr++;
-                    aux = "A" + addr + ":";
+                    aux = "A" + addr + ":" + "\n";
                     strBuffer_VM.append(aux);
                     pilhaRotulosParaWHILES.add(aux);
                 } else if (codigo_Aux.getOperator() == Tag.END && "IF".equals(codigo_Aux.getResult())) {
                     if (!"ELSE".equals(code.peekFirst().getResult())) {
-                        aux = pilhaRotulosParaIF.pop();
+                        aux = pilhaRotulosParaIF.pop() + "\n";
                         strBuffer_VM.append(aux);
                     } else {
-                        aux = "JUMP " + "B" + indiceRotulosElses + ":";
+                        aux = "JUMP " + "B" + indiceRotulosElses + ":" + "\n";
                         pilhaRotulosParaELSEs.add("B" + indiceRotulosElses + ":");
                         indiceRotulosElses--;
                         strBuffer_VM.append(aux);
@@ -436,21 +457,37 @@ public class generatorCode {
 
                 } else if (codigo_Aux.getOperator() == Tag.END
                         && "ELSE".equals(codigo_Aux.getResult())) {
-                    strBuffer_VM.append(pilhaRotulosParaELSEs.pop());
+                    aux = pilhaRotulosParaELSEs.pop() + "\n";
+                    strBuffer_VM.append(aux);
+
+                } else if (codigo_Aux.getOperator() == Tag.SCAN) {
+                    wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1().toString());
+                    strBuffer_VM.append("READ \n");
+                    aux = "STOREG " + Ambiente.table.get(wordAux).getOffset() + "\n";
+                    strBuffer_VM.append(aux);
+                } else if (codigo_Aux.getOperator() == Tag.PRINT) {
+                    wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1().toString());
+                    if (wordAux != null) {
+                        aux = "PUSHG " + Ambiente.table.get(wordAux).getOffset() + "\n";
+                        strBuffer_VM.append(aux);
+                        aux = operacaoSaidaEscritaID(wordAux.getType())+ "\n" ;
+                        strBuffer_VM.append(aux);
+
+                    } else {
+                        int tipo = codigo_Aux.getArgument1().getTag();
+                        aux = atribuicaoConstanteTipo(tipo) + codigo_Aux.getArgument1().toString() + "\n";
+                        strBuffer_VM.append(aux);
+                        aux = operacaoSaidaEscritaConstante(tipo) + "\n";
+                        strBuffer_VM.append(aux);
+                    }
 
                 }
-                else if(codigo_Aux.getOperator() == Tag.SCAN){
-                    strBuffer_VM.append("READ");
-                }
-                else if(codigo_Aux.getOperator() == Tag.PRINT){
-                    if (codigo_Aux.getArgument1().getTag() == Tag. )
-                }
-                
 
             }
         }
-        aux = "STOP";
+        aux = "STOP" + "\n";
         strBuffer_VM.append(aux);
+        System.out.println("-------------------------------------");
     }
 
     public String atribuicaoConstanteTipo(int tag) {
@@ -461,6 +498,20 @@ public class generatorCode {
                 return "PUSHF ";
             case Tag.LITERAL:
                 return "PUSHS ";
+            default:
+                return null;
+
+        }
+    }
+
+    public String getOperacaoTipoID(String tag, int operacao) {
+        switch (tag) {
+            case "INT":
+                return operacaoInteiro(operacao);
+            case "FLOAT":
+                return operacaoFlutuante(operacao);
+            case "STRING":
+                return operacaoString(operacao);
             default:
                 return null;
 
@@ -498,34 +549,34 @@ public class generatorCode {
     public String operacaoInteiro(int operacao) {
         switch (operacao) {
             case Tag.PLUS:
-                return "ADD";
+                return "ADD \n";
 
             case Tag.MINUS:
-                return "SUB";
+                return "SUB \n";
 
             case Tag.DIV:
-                return "DIV";
+                return "DIV \n";
 
             case Tag.MULT:
-                return "MUL";
+                return "MUL \n";
 
             case Tag.GE:
-                return "SUPEQ";
+                return "SUPEQ \n";
 
             case Tag.GT:
-                return "SUP";
+                return "SUP \n";
 
             case Tag.EQ:
-                return "EQUAL";
+                return "EQUAL \n";
 
             case Tag.LE:
-                return "INFEQ";
+                return "INFEQ \n";
 
             case Tag.LT:
-                return "INF";
+                return "INF \n";
 
             case Tag.NEQ:
-                return "NOT \n EQUAL";
+                return "NOT \n EQUAL \n";
 
         }
         return null;
@@ -534,31 +585,31 @@ public class generatorCode {
     public String operacaoFlutuante(int operacao) {
         switch (operacao) {
             case Tag.PLUS:
-                return "FADD";
+                return "FADD \n";
 
             case Tag.MINUS:
-                return "FSUB";
+                return "FSUB \n";
 
             case Tag.DIV:
-                return "FDIV";
+                return "FDIV \n";
 
             case Tag.MULT:
-                return "FMUL";
+                return "FMUL \n";
 
             case Tag.GE:
-                return "FSUPEQ";
+                return "FSUPEQ \n";
 
             case Tag.GT:
-                return "FSUP";
+                return "FSUP \n";
 
             case Tag.EQ:
-                return "EQUAL";
+                return "EQUAL \n";
 
             case Tag.LE:
-                return "FINFEQ";
+                return "FINFEQ \n";
 
             case Tag.LT:
-                return "FINF";
+                return "FINF \n";
 
         }
         return null;
@@ -567,23 +618,31 @@ public class generatorCode {
     public String operacaoString(int operacao) {
         switch (operacao) {
             case Tag.PLUS:
-                return "CONCAT";
+                return "CONCAT \n";
         }
         return null;
     }
 
-    public String operacaoSaidaInteiro(int operacao) {
+    public String operacaoSaidaEscritaConstante(int operacao) {
         switch (operacao) {
-            case Tag.PRINT:
+            case Tag.INTEIRO:
                 return "WRITEI ";
+            case Tag.FLUTUANTE:
+                return "WRITEF ";
+            case Tag.LITERAL:
+                return "WRITES ";
         }
         return null;
     }
 
-    public String operacaoSaidaFlutuante(int operacao) {
+    public String operacaoSaidaEscritaID(String operacao) {
         switch (operacao) {
-            case Tag.PRINT:
+            case "INT":
+                return "WRITEI ";
+            case "FLOAT":
                 return "WRITEF ";
+            case "STRING":
+                return "WRITES ";
         }
         return null;
     }
@@ -591,7 +650,7 @@ public class generatorCode {
     public String operacaoEntrada(int operacao) {
         switch (operacao) {
             case Tag.SCAN:
-                return "READ";
+                return "READ \n";
         }
         return null;
     }
@@ -621,6 +680,22 @@ public class generatorCode {
 
     public boolean containsTemporarioQualquer(String aux) {
         return containsCondicao(aux) || containsTemporario(aux);
+    }
+
+    public void controle(TreeAdressLine codigo_Aux) {
+        System.out.println("---");
+        System.out.println("Operator: " + codigo_Aux.getOperator());
+
+        if (codigo_Aux.getArgument1() != null) {
+            System.out.println("Arg1: " + codigo_Aux.getArgument1().toString() + " " + codigo_Aux.getArgument1().getTag());
+        }
+        if (codigo_Aux.getArgument2() != null) {
+            System.out.println("Arg2: " + codigo_Aux.getArgument2().toString() + " " + codigo_Aux.getArgument2().getTag());
+        }
+        if (codigo_Aux.getResult() != null) {
+            System.out.println("Result: " + codigo_Aux.getResult());
+        }
+        System.out.println("---");
     }
 
 }

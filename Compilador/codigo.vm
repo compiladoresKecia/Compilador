@@ -1,7 +1,32 @@
-
-
-- Nenhum erro foi encontrado.
-
-Analise Sintatica realizada com sucesso!! -
-
+START
+PUSHN 7
+PUSHI 2
+STOREG 0
+PUSHF 0.1
+STOREG 3
+READ 
+STOREG 1
+READ 
+STOREG 3
+PUSHG 0
+PUSHG 1
+MUL 
+PUSHI 1
+ADD 
+PUSHI 2
+DIV 
+PUSHS "Resultado: "
+WRITES 
+PUSHG 2
+WRITEI 
+PUSHS "Total: "
+WRITES 
+PUSHG 2
+PUSHG 3
+DIV 
+PUSHS "Total: "
+WRITES 
+PUSHG 4
+WRITEF 
+STOP
 
