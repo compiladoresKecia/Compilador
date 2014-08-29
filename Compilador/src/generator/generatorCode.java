@@ -56,7 +56,7 @@ public class generatorCode {
     /**
      * Resultado da linha do codigo.
      */
-    private Token resultFinal;
+    private String resultFinal;
     /**
      * Linha do codigo DO-WHILE para carregar.
      */
@@ -106,10 +106,10 @@ public class generatorCode {
 
     public void adicionarAtrib() {
         if (indiceTemporario > 0) {
-            code.add(new TreeAdressLine(Tag.ATRIB, temporario, null, resultFinal.toString()));
+            code.add(new TreeAdressLine(Tag.ATRIB, temporario, null, resultFinal));
             indiceTemporario = 0;
         } else {
-            code.add(new TreeAdressLine(Tag.ATRIB, argumentTemporario, null, resultFinal.toString()));
+            code.add(new TreeAdressLine(Tag.ATRIB, argumentTemporario, null, resultFinal));
         }
         limparPilhas();
     }
@@ -226,11 +226,11 @@ public class generatorCode {
         pilhaArg.push(argument1Temporario);
     }
 
-    public Token getResultFinal() {
+    public String getResultFinal() {
         return resultFinal;
     }
 
-    public void setResultFinal(Token resultFinal) {
+    public void setResultFinal(String resultFinal) {
         this.resultFinal = resultFinal;
     }
 
@@ -312,9 +312,6 @@ public class generatorCode {
                         || codigo_Aux.getOperator() == Tag.LE
                         || codigo_Aux.getOperator() == Tag.LT
                         || codigo_Aux.getOperator() == Tag.NEQ) {
-
-              
-                    
 
                 }
             }
@@ -429,11 +426,9 @@ public class generatorCode {
     }
 
     public boolean containsTemporario(String aux) {
-
         if (aux.equals(temporario.toString())) {
             return true;
         }
-
         return false;
     }
 

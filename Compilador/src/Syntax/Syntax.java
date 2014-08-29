@@ -355,7 +355,7 @@ public class Syntax {
             case Tag.ID:
                 this.semantic = new Semantics(this.current, Tag.ID, this.token.toString());                
                 adicionarElemento(this.semantic.Absence());
-                generatorCode.setResultFinal(this.token);
+                generatorCode.setResultFinal(this.token.toString());
                 assignStmt();
                 generatorCode.adicionarAtrib();
                 break;
