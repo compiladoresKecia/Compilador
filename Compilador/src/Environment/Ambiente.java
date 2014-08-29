@@ -92,5 +92,22 @@ public class Ambiente {
         }
         return new Identificador(i);
     }
+    /**
+     * Get pelo Lexema.
+     * @param lexema
+     * @return 
+     */
+    public static int getOffsetPeloLexema(String lexema){
+        return offset(getPeloLexema(lexema));
+    }
+    
+    /**
+     * Pegar o offset da word.
+     * @param word
+     * @return 
+     */
+    private static int offset(Word word){
+        return table.get(word).getOffset();
+    }
 
 }
