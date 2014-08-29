@@ -5,9 +5,14 @@
  */
 package generator;
 
+/**
+ *
+ *
+ * EXEMPLO: VERIFICA T1 = 1 + 2 PUSHI 1 PUSHI 2 ADD T2 = 2 + TI PUSHI 2 ADD T3 =
+ * 4 * T2 PUSHI 4 MULT A = T3 STOREG OFFSET_A
+ * 
+*/
 import Environment.Ambiente;
-import Environment.id.Identificador;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Stack;
 import lexer.Tag;
@@ -42,16 +47,16 @@ public class generatorCode {
     /**
      * Argumentos.
      */
-    private String argumentTemporario;
+    private Token argumentTemporario;
     /**
      * Pilha argumentos.
      */
 
-    private Stack<String> pilhaArg;
+    private Stack<Token> pilhaArg;
     /**
      * Resultado da linha do codigo.
      */
-    private String resultFinal;
+    private Token resultFinal;
     /**
      * Linha do codigo DO-WHILE para carregar.
      */
@@ -73,19 +78,17 @@ public class generatorCode {
 
     private final int max_Indice = 31;
 
-    private final String temporario[] = {"t1", "t2", "t3", "t4", "t5", "t6",
-        "t7", "t8", "t9", "t10", "t11", "t12", "t13", "t14", "t15", "t16",
-        "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26",
-        "t27", "t28", "t29", "t30", "t31", "t32"};
+    private final Token temporario = new Token(100);
 
     private final static int Lado_Esquerdo = 0, Lado_Direito = 1, Lado_Condicao = 2;
-    private final String temporario_Condicao[] = {"tl", "tr", "tCo"};
+    private final Token temporario_Condicao[] = {new Token(101), new Token(102), new Token(103)};
 
     private int condicionalOperador;
 
     private int indiceTemporario;
 
     public generatorCode() {
+
         code = new LinkedList<>();
         indiceTemporario = 0;
         linhaRetorno = 0;
@@ -103,10 +106,10 @@ public class generatorCode {
 
     public void adicionarAtrib() {
         if (indiceTemporario > 0) {
-            code.add(new TreeAdressLine(Tag.ATRIB, temporario[indiceTemporario - 1], null, resultFinal));
+            code.add(new TreeAdressLine(Tag.ATRIB, temporario, null, resultFinal.toString()));
             indiceTemporario = 0;
         } else {
-            code.add(new TreeAdressLine(Tag.ATRIB, argumentTemporario, null, resultFinal));
+            code.add(new TreeAdressLine(Tag.ATRIB, argumentTemporario, null, resultFinal.toString()));
         }
         limparPilhas();
     }
@@ -127,54 +130,54 @@ public class generatorCode {
         this.argumentTemporario = this.obterArgumentPilha();
     }
 
-    public void adicionarAssigmentExpression(String arg) {
+    public void adicionarAssigmentExpression(Token arg) {
         if (indiceTemporario == 0) {
             //Importante para retirar o ultimo lance caso exista apenas 1 na pilha
             remover1lancePilha();
             code.add(new TreeAdressLine(this.getOperatorTemporario(),
-                    arg, this.argumentTemporario, temporario[indiceTemporario]));
+                    arg, this.argumentTemporario, temporario.toString()));
         } else {
             remover1lancePilha();
             code.add(new TreeAdressLine(this.getOperatorTemporario(),
-                    this.argumentTemporario, temporario[indiceTemporario - 1], temporario[indiceTemporario]));
+                    this.argumentTemporario, temporario, temporario.toString()));
         }
 
         incrementaIndiceTemporario();
     }
 
     public void adicionarNot() {
-        code.add(new TreeAdressLine(Tag.NOT, argumentTemporario, null, temporario[indiceTemporario]));
-        this.argumentTemporario = temporario[indiceTemporario];
+        code.add(new TreeAdressLine(Tag.NOT, argumentTemporario, null, temporario.toString()));
+        this.argumentTemporario = temporario;
         incrementaIndiceTemporario();
     }
 
     public void adicionarMinus() {
-        code.add(new TreeAdressLine(Tag.MINUS, argumentTemporario, null, temporario[indiceTemporario]));
-        this.argumentTemporario = temporario[indiceTemporario];
+        code.add(new TreeAdressLine(Tag.MINUS, argumentTemporario, null, temporario.toString()));
+        this.argumentTemporario = temporario;
         incrementaIndiceTemporario();
     }
 
     public void adicionarIFStatement() {
-        code.add(new TreeAdressLine(Tag.IF, temporario[indiceTemporario - 1], null, "goto " + code.size() + 2));
+        code.add(new TreeAdressLine(Tag.IF, temporario, null, "goto " + code.size() + 2));
         code.add(new TreeAdressLine(0, null, null, "goto LABEL_PILHA_IF"));
     }
 
     public void adicionarElsetatement() {
-        code.add(new TreeAdressLine(Tag.ELSE, temporario[indiceTemporario - 1], null, "goto " + code.size() + 1));
+        code.add(new TreeAdressLine(Tag.ELSE, temporario, null, "goto " + code.size() + 1));
         code.add(new TreeAdressLine(0, null, null, "goto LABEL_PILHA_ELSE"));
     }
 
     public void adicionarLadoEsquerdoCondicao() {
-        code.add(new TreeAdressLine(Tag.ATRIB, temporario[indiceTemporario - 1], null, temporario_Condicao[Lado_Esquerdo]));
+        code.add(new TreeAdressLine(Tag.ATRIB, temporario, null, temporario_Condicao[Lado_Esquerdo].toString()));
         limparPilhas();
     }
 
     public void adicionarCondicao() {
-        code.add(new TreeAdressLine(Tag.ATRIB, temporario[indiceTemporario - 1], null, temporario_Condicao[Lado_Direito]));
+        code.add(new TreeAdressLine(Tag.ATRIB, temporario, null, temporario_Condicao[Lado_Direito].toString()));
         code.add(new TreeAdressLine(operatorTemporario,
                 temporario_Condicao[Lado_Esquerdo],
                 temporario_Condicao[Lado_Direito],
-                temporario_Condicao[Lado_Condicao]));
+                temporario_Condicao[Lado_Condicao].toString()));
         limparPilhas();
 
     }
@@ -210,24 +213,24 @@ public class generatorCode {
         operatorStack.push(operatorTemporario);
     }
 
-    public String obterArgumentPilha() {
+    public Token obterArgumentPilha() {
         return pilhaArg.pop();
     }
 
-    public String getArgumenTemporario() {
+    public Token getArgumenTemporario() {
         return argumentTemporario;
     }
 
-    public void setArgumentTemporario(String argument1Temporario) {
+    public void setArgumentTemporario(Token argument1Temporario) {
         this.argumentTemporario = argument1Temporario;
         pilhaArg.push(argument1Temporario);
     }
 
-    public String getResultFinal() {
+    public Token getResultFinal() {
         return resultFinal;
     }
 
-    public void setResultFinal(String resultFinal) {
+    public void setResultFinal(Token resultFinal) {
         this.resultFinal = resultFinal;
     }
 
@@ -278,13 +281,15 @@ public class generatorCode {
             wordResult = Ambiente.getPeloLexema(rsult);
             if (wordResult != null) {
                 if (codigo_Aux.getOperator() == Tag.ATRIB) {
-                    wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1());
+                    wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1().toString());
                     // caso o primeiro argumento nao for id wordaux eh nullo
                     if (wordAux == null) {
-                        wordAux = Ambiente.getPeloLexema(codigo_Aux.getResult());
-                        aux = atribuicaoTipo(wordAux.getType()) + codigo_Aux.getArgument1();
-                        strBuffer_VM.append(aux);
-                        aux = "STOREG " + Ambiente.getOffsetPeloLexema(wordAux.lexeme);
+                        // Se nao for um terminal carregue seu valor com PUSH
+                        if (!containsTemporarioQualquer(codigo_Aux.getArgument1().toString())) {
+                            aux = atribuicaoTipo(wordResult.getType()) + codigo_Aux.getArgument1();
+                            strBuffer_VM.append(aux);
+                        }
+                        aux = "STOREG " + Ambiente.getOffsetPeloLexema(wordResult.lexeme);
                         strBuffer_VM.append(aux);
                     }//caso wordaux eh id faca
                     else {
@@ -295,7 +300,9 @@ public class generatorCode {
                         strBuffer_VM.append(aux);
                     }
                 }
-                if (    codigo_Aux.getOperator() == Tag.PLUS
+
+            } else {
+                if (codigo_Aux.getOperator() == Tag.PLUS
                         || codigo_Aux.getOperator() == Tag.MINUS
                         || codigo_Aux.getOperator() == Tag.MULT
                         || codigo_Aux.getOperator() == Tag.DIV
@@ -306,11 +313,10 @@ public class generatorCode {
                         || codigo_Aux.getOperator() == Tag.LT
                         || codigo_Aux.getOperator() == Tag.NEQ) {
 
-                    arg1 = codigo_Aux.getArgument1();
-                    arg2 = codigo_Aux.getArgument2();
+              
+                    
 
                 }
-
             }
         }
     }
@@ -406,4 +412,39 @@ public class generatorCode {
         return null;
     }
 
+    public StringBuffer getStrBuffer_VM() {
+        gerarCodigo();
+        return strBuffer_VM;
+    }
+
+    public boolean containsCondicao(String aux) {
+
+        for (int i = 0; i <= 2; i++) {
+            if (aux.equals(temporario_Condicao[i].toString())) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    public boolean containsTemporario(String aux) {
+
+        if (aux.equals(temporario.toString())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean containsTemporarioQualquer(String aux) {
+        return containsCondicao(aux) || containsTemporario(aux);
+    }
+
 }
+/**
+ *  * --- c = b + a * (1 + a*c); A=[b] O=[+] A=[a b] O=[* +] A=[1 a b] O=[+ * +]
+ * A=[a 1 a b] O=[* + * +] A=[c a 1 a b] O=[* + * +] arg = a argumentTemp = c -
+ * t1 =a*c I=1 ---- A=[1 a b] O=[ + * +] arg = a argumentTemp = 1 -t2=1+t1 ----
+ * A=[a b] O=[* +] argumentTemp = a -t3= a* t2 ---- A=[b] O=[+] -t4= a+ t3 ----
+ */

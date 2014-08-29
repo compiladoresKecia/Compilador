@@ -18,24 +18,4 @@ start
 	a = (b + c + d)/2;
 	a = l;
 exit
-c = b + a * (1 + a*c);
-A=[b] O=[+]
-A=[a b] O=[* +]
-A=[1 a b] O=[+ * +]
-A=[a 1 a b] O=[* + * +]
-A=[c a 1 a b] O=[* + * +]
-arg = a
-argumentTemp = c
-- t1 =a*c I=1
-----
-A=[1 a b] O=[ + * +]
-arg = a
-argumentTemp = 1
--t2=1+t1
-----
-A=[a b] O=[* +]
-argumentTemp = a
--t3= a* t2
-----
-A=[b] O=[+]
--t4= a+ t3
+

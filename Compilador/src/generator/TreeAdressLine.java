@@ -6,6 +6,8 @@
 
 package generator;
 
+import lexer.Token;
+
 /**
  *
  * @author Guilherme
@@ -18,7 +20,7 @@ public class TreeAdressLine {
     /**
      * Argumentos.
      */
-    private String argument1,argument2;
+    private Token argument1,argument2;
     /**
      * Resultado do codigo.
      */
@@ -30,7 +32,7 @@ public class TreeAdressLine {
      * @param argument2
      * @param result 
      */
-    public TreeAdressLine(int operator, String argument1, String argument2, String result) {
+    public TreeAdressLine(int operator, Token argument1, Token argument2, String result) {
         this.operator = operator;
         this.argument1 = argument1;
         this.argument2 = argument2;
@@ -45,19 +47,19 @@ public class TreeAdressLine {
         this.operator = operator;
     }
 
-    public String getArgument1() {
+    public Token getArgument1() {
         return argument1;
     }
 
-    public void setArgument1(String argument1) {
+    public void setArgument1(Token argument1) {
         this.argument1 = argument1;
     }
 
-    public String getArgument2() {
+    public Token getArgument2() {
         return argument2;
     }
 
-    public void setArgument2(String argument2) {
+    public void setArgument2(Token argument2) {
         this.argument2 = argument2;
     }
 

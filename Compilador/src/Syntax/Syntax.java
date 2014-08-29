@@ -105,7 +105,7 @@ public class Syntax {
     /**
      * Argumento auxiliar.
      */
-    private String argAux;
+    private Token argAux;
     
     
     
@@ -301,7 +301,7 @@ public class Syntax {
     private void identifier() {
         switch (this.token.getTag()) {
             case Tag.ID:
-                generatorCode.setArgumentTemporario(this.token.toString());
+                generatorCode.setArgumentTemporario(this.token);
                 eat(Tag.ID);
                 break;
             default:
@@ -355,7 +355,7 @@ public class Syntax {
             case Tag.ID:
                 this.semantic = new Semantics(this.current, Tag.ID, this.token.toString());                
                 adicionarElemento(this.semantic.Absence());
-                generatorCode.setResultFinal(this.token.toString());
+                generatorCode.setResultFinal(this.token);
                 assignStmt();
                 generatorCode.adicionarAtrib();
                 break;
@@ -484,7 +484,7 @@ public class Syntax {
                 simpleExpr1();
                 break;
             case Tag.LITERAL:
-                generatorCode.setArgumentTemporario(this.token.toString());
+                generatorCode.setArgumentTemporario(this.token);
                 eat(Tag.LITERAL);
                 break;
             case 293:
@@ -626,7 +626,7 @@ public class Syntax {
                 //   adicionarElemento(this.semantic.TypeAssignment(this.token.toString(), 0));
                 tipo_temporario = semantic.tipoIDLexema(token.toString());
                 //ID  com o resultado final
-                generatorCode.setArgumentTemporario(this.token.toString());
+                generatorCode.setArgumentTemporario(this.token);
                 eat(Tag.ID);
                 break;
             case Tag.INTEIRO:
@@ -709,17 +709,17 @@ public class Syntax {
         switch (this.token.getTag()) {
             case Tag.INTEIRO:
                 tipo_temporario = Tag.INTEIRO; 
-                generatorCode.setArgumentTemporario(this.token.toString());
+                generatorCode.setArgumentTemporario(this.token);
                 eat(Tag.INTEIRO);
                 break;
             case Tag.LITERAL:
                 tipo_temporario = Tag.LITERAL;
-                generatorCode.setArgumentTemporario(this.token.toString());
+                generatorCode.setArgumentTemporario(this.token);
                 eat(Tag.LITERAL);
                 break;
             case Tag.FLUTUANTE:
                 tipo_temporario = Tag.FLUTUANTE;
-                generatorCode.setArgumentTemporario(this.token.toString());
+                generatorCode.setArgumentTemporario(this.token);
                 eat(Tag.FLUTUANTE);
                 break;
             default:
