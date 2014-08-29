@@ -69,4 +69,9 @@ public class TreeAdressLine {
         this.result = result;
     }
     
+    @Override
+    public String toString(){
+        return operator+" "+argument1+" "+argument2+" "+result+" ";
+    }
+    
 }
