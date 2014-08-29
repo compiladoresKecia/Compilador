@@ -399,4 +399,12 @@ public class Lexer
   {
     this.baseTXT.escreverArquivoSemantico(stBuffer);
   }
+  
+  public void gravarArquivoCodigo(StringBuffer stBuffer)
+  {
+    this.baseTXT.escreverArquivoCodigo(stBuffer);
+  }
+  
+  
+  
 }

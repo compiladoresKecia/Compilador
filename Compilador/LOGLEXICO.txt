@@ -12,6 +12,8 @@ Linha	Lexema		Valor
   3      result		294
   3      ;		285
   4      float		270
+  4      a		294
+  4      ,		284
   4      x		294
   4      ,		284
   4      total		294
@@ -31,7 +33,7 @@ Linha	Lexema		Valor
   8      ;		285
   9      scan		264
   9      (		286
-  9      x		294
+  9      y		294
   9      )		287
   9      ;		285
   10      result		294
@@ -63,7 +65,7 @@ Linha	Lexema		Valor
   13      ;		285
   14      total		294
   14      =		282
-  14      result		294
+  14      y		294
   14      /		281
   14      x		294
   14      ;		285
@@ -80,18 +82,12 @@ Linha	Lexema		Valor
   17      exit		257
 
 	**Identificadores**
-<<<<<<< HEAD
- total
- a
- result
- b
-=======
- a
- b
- result
- total
->>>>>>> origin/fdpdessegit
  x
+ y
+ a
+ result
+ b
+ total
 	**Palavras Reservadas**
  start
  int
