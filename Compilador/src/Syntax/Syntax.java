@@ -398,8 +398,8 @@ public class Syntax {
                 condition();                
                 eat(Tag.THEN);
                 generatorCode.adicionarIFStatement();
-                stmtList();                
-                generatorCode.inserirLinhaRotuloIF();
+                stmtList(); 
+                generatorCode.adicionarENDStatement();
                 elseStmt();
                 break;
             default:
@@ -410,9 +410,9 @@ public class Syntax {
     private void elseStmt() {
         if (this.token.getTag() == Tag.ELSE) {
             generatorCode.adicionarElsetatement();
-            generatorCode.inserirLinhaRotuloELSE();
             eat(Tag.ELSE);
             stmtList();
+            generatorCode.adicionarENDELSEStatement();
         }
         eat(Tag.END);
     }

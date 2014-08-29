@@ -64,12 +64,18 @@ public class generatorCode {
     /**
      * Lista dos falselist para os IFs.
      */
-    private Stack<Integer> pilhaRotulosParaIF;
+    private Stack<String> pilhaRotulosParaIF;
+    private int indiceRotulos;
+    /**
+     * Lista dos falselist para os IFs.
+     */
+    private Stack<String> pilhaRotulosParaWHILES;
 
     /**
      * Lista dos falselist para os ELSEs.
      */
-    private Stack<Integer> pilhaRotulosParaELSEs;
+    private Stack<String> pilhaRotulosParaELSEs;
+    private int indiceRotulosElses;
 
     /**
      * Buffer para o codigo vm
@@ -90,7 +96,8 @@ public class generatorCode {
     private LinkedList<Integer> tipoCondicao;
 
     public generatorCode() {
-
+        indiceRotulos = 0 ;
+        indiceRotulosElses = 0;
         code = new LinkedList<>();
         indiceTemporario = 0;
         linhaRetorno = 0;
@@ -99,6 +106,7 @@ public class generatorCode {
         pilhaRotulosParaIF = new Stack<>();
         pilhaRotulosParaELSEs = new Stack<>();
         tipoCondicao = new LinkedList();
+        pilhaRotulosParaWHILES = new Stack();
     }
 
     public void limparPilhas() {
@@ -161,13 +169,20 @@ public class generatorCode {
     }
 
     public void adicionarIFStatement() {
-        code.add(new TreeAdressLine(Tag.IF, temporario, null, "goto " + code.size() + 2));
-        code.add(new TreeAdressLine(0, null, null, "goto LABEL_PILHA_IF"));
+        code.add(new TreeAdressLine(Tag.IF, temporario, null, "IF"));
+    }
+    public void adicionarENDStatement() {
+        code.add(new TreeAdressLine(Tag.END, temporario, null, "IF"));
+        indiceRotulos++;
     }
 
     public void adicionarElsetatement() {
-        code.add(new TreeAdressLine(Tag.ELSE, temporario, null, "goto " + code.size() + 1));
-        code.add(new TreeAdressLine(0, null, null, "goto LABEL_PILHA_ELSE"));
+        code.add(new TreeAdressLine(Tag.ELSE, temporario, null, "ELSE"));
+        
+    }
+    public void adicionarENDELSEStatement() {
+        code.add(new TreeAdressLine(Tag.END, temporario, null, "ELSE"));
+        indiceRotulosElses++;
     }
 
     public void adicionarLadoEsquerdoCondicao() {
@@ -191,9 +206,10 @@ public class generatorCode {
     }
 
     public void adicionarWhile() {
-        code.add(new TreeAdressLine(Tag.IF, temporario_Condicao[Lado_Condicao], null, "goto " + linhaRetorno));
+        code.add(new TreeAdressLine(Tag.IF, temporario_Condicao[Lado_Condicao], null, "while"));
         limparPilhas();
     }
+
     public void adicionarDo() {
         code.add(new TreeAdressLine(Tag.DO, null, null, null));
         limparPilhas();
@@ -265,20 +281,14 @@ public class generatorCode {
         linhaRetorno = code.size();
     }
 
-    public void inserirLinhaRotuloIF() {
-        pilhaRotulosParaIF.push(code.size());
-    }
-
-    public void inserirLinhaRotuloELSE() {
-        pilhaRotulosParaELSEs.push(code.size());
-    }
-
+   
     public void inserirTipoCondicao(int tipo) {
         tipoCondicao.push(tipo);
     }
 
     public void gerarCodigo() {
         TreeAdressLine codigo_Aux;
+        int addr = 0;
         Word wordAux, wordResult;
         String aux, rsult;
         String arg1, arg2;
@@ -347,24 +357,23 @@ public class generatorCode {
                             strBuffer_VM.append(aux);
                             aux = getOperacaoTipo(codigo_Aux.getArgument1().getTag(), codigo_Aux.getOperator());
                             strBuffer_VM.append(aux);
-                        }
-                        //TEMPORARIO = TEMPORARIO OPERACAO TEMPORARIO
+                        } //TEMPORARIO = TEMPORARIO OPERACAO TEMPORARIO
                         else if (temporario_Condicao[Lado_Condicao].toString().equals(codigo_Aux.getResult())) {
                             // LADO condicao
                             int tipo_condicao = tipoCondicao.pop();
-                            
+
                             aux = "PUSHG " + (offset_Max + 1);
                             strBuffer_VM.append(aux);
-                            
+
                             aux = "PUSHG " + (offset_Max + 2);
                             strBuffer_VM.append(aux);
                             aux = getOperacaoTipo(tipo_condicao, codigo_Aux.getOperator());
                             strBuffer_VM.append(aux);
                             aux = "STOREG " + (offset_Max + 3);
                             strBuffer_VM.append(aux);
-                            
-                        } 
-                        
+
+                        }
+
                     }
 
                 } else if (temporario_Condicao[Lado_Esquerdo].toString().equals(codigo_Aux.getResult())) {
@@ -375,17 +384,48 @@ public class generatorCode {
                     // LADO DIREITO CONDICIONAL
                     aux = "STOREG " + (offset_Max + 2);
                     strBuffer_VM.append(aux);
-                } else if (codigo_Aux.getOperator() == Tag.IF){
-                    aux = "PUSHG "+(offset_Max + 3);
+                } else if (codigo_Aux.getOperator() == Tag.IF) {
+                    aux = "PUSHG " + (offset_Max + 3);
                     strBuffer_VM.append(aux);
-                    aux = "JZ LABEL_PREENCHER";
-                }else if (codigo_Aux.getOperator() == Tag.ELSE){
-                    
+                    aux = "NOT";
+                    strBuffer_VM.append(aux);
+                    if (codigo_Aux.getResult().equals("while")) {                        
+                        aux = "JZ "+pilhaRotulosParaWHILES.pop();
+                        strBuffer_VM.append(aux);
+                    }
+                    else{
+                        aux = "JZ "+pilhaRotulosParaIF.pop();
+                        strBuffer_VM.append(aux);
+                    }
+                } else if (codigo_Aux.getOperator() == Tag.ELSE) {
+                    aux = "PUSHG " + (offset_Max + 3);
+                    strBuffer_VM.append(aux);
+                    aux = "JZ "+pilhaRotulosParaELSEs.pop();
+                        strBuffer_VM.append(aux);
                 }
-                
+                else if(codigo_Aux.getOperator() == Tag.DO){
+                    addr++;
+                    aux = "A"+addr+":";
+                    strBuffer_VM.append(aux);
+                    pilhaRotulosParaWHILES.add(aux);
+                }
+                else if(codigo_Aux.getOperator() == Tag.END && codigo_Aux.getResult()=="IF"){                    
+                    aux = "B"+indiceRotulos+":";
+                    indiceRotulos--;
+                    strBuffer_VM.append(aux);
+                    pilhaRotulosParaIF.add(aux);
+                }else if(codigo_Aux.getOperator() == Tag.END && codigo_Aux.getResult()=="ELSE"){                    
+                    aux = "C"+indiceRotulosElses+":";
+                    indiceRotulosElses--;
+                    strBuffer_VM.append(aux);
+                    pilhaRotulosParaELSEs.add(aux);
+                }
+
 
             }
         }
+        aux = "STOP";
+        strBuffer_VM.append(aux);
     }
 
     public String atribuicaoConstanteTipo(int tag) {
