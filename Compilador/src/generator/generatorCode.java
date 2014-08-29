@@ -215,6 +215,18 @@ public class generatorCode {
         limparPilhas();
     }
 
+    
+    public void adicionarRead(){
+        code.add(new TreeAdressLine(Tag.SCAN, argumentTemporario, null, temporario.toString()));
+        this.argumentTemporario = temporario;
+        incrementaIndiceTemporario();
+    }
+    
+    public void adicionarWrite(){
+        
+    }
+    
+    
     public LinkedList<TreeAdressLine> getCode() {
         return code;
     }
@@ -546,6 +558,32 @@ public class generatorCode {
         }
         return null;
     }
+    
+    public String operacaoSaidaInteiro(int operacao) {
+        switch (operacao) {
+            case Tag.PRINT:
+                return "WRITEI";
+        }
+        return null;
+    }
+    
+    public String operacaoSaidaFlutuante(int operacao) {
+        switch (operacao) {
+            case Tag.PRINT:
+                return "WRITEF";
+        }
+        return null;
+    }
+    
+    public String operacaoEntrada(int operacao) {
+        switch (operacao) {
+            case Tag.SCAN:
+                return "READ";
+        }
+        return null;
+    }
+    
+    
 
     public StringBuffer getStrBuffer_VM() {
         gerarCodigo();
