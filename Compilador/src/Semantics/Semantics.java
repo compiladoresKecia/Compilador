@@ -54,12 +54,12 @@ public class Semantics {
                     erro = "Erro! Tipo nao encontrado";
                     break;
             }
+            this.word1.setType(this._tipo);
+            Ambiente.table.remove(this.word);
+            Ambiente.table.put(this.word1, Ambiente.gerarIdentificador());
         } else {
             erro = Unicity();
         }
-        this.word1.setType(this._tipo);
-        Ambiente.table.remove(this.word);
-        Ambiente.table.put(this.word1, idVazio);
 
         return erro;
     }
@@ -124,15 +124,17 @@ public class Semantics {
 
     public int tipoDaPalavra(String tipoAnalise) {
         int tipoRetorno = -1;
-        switch (tipoAnalise) {
-            case "INT":
-                tipoRetorno = Tag.INTEIRO;
-                break;
-            case "STRING":
-                tipoRetorno = Tag.FLUTUANTE;
-                break;
-            case "FLOAT":
-                tipoRetorno = Tag.FLUTUANTE;
+        if (tipoAnalise != null) {
+            switch (tipoAnalise) {
+                case "INT":
+                    tipoRetorno = Tag.INTEIRO;
+                    break;
+                case "STRING":
+                    tipoRetorno = Tag.FLUTUANTE;
+                    break;
+                case "FLOAT":
+                    tipoRetorno = Tag.FLUTUANTE;
+            }
         }
         return tipoRetorno;
     }

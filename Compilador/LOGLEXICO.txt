@@ -80,10 +80,17 @@ Linha	Lexema		Valor
   17      exit		257
 
 	**Identificadores**
+<<<<<<< HEAD
  total
  a
  result
  b
+=======
+ a
+ b
+ result
+ total
+>>>>>>> origin/fdpdessegit
  x
 	**Palavras Reservadas**
  start
