@@ -463,6 +463,11 @@ public class generatorCode {
                 } else if (codigo_Aux.getOperator() == Tag.SCAN) {
                     wordAux = Ambiente.getPeloLexema(codigo_Aux.getArgument1().toString());
                     strBuffer_VM.append("READ \n");
+                    
+                    if (wordAux.getType() != "String"){
+                        strBuffer_VM.append(getConverter(wordAux.getType()));
+                        
+                    }
                     aux = "STOREG " + Ambiente.table.get(wordAux).getOffset() + "\n";
                     strBuffer_VM.append(aux);
                 } else if (codigo_Aux.getOperator() == Tag.PRINT) {
@@ -498,6 +503,18 @@ public class generatorCode {
                 return "PUSHF ";
             case Tag.LITERAL:
                 return "PUSHS ";
+            default:
+                return null;
+
+        }
+    }
+     public String getConverter(String tag) {
+        switch (tag) {
+            case "INT":
+                return "ATOI \n";
+            case "FLOAT":
+                return "ATOF \n";
+            
             default:
                 return null;
 

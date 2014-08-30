@@ -80,11 +80,11 @@ Linha	Lexema		Valor
   17      exit		257
 
 	**Identificadores**
- result
- b
- a
  total
  x
+ result
+ a
+ b
 	**Palavras Reservadas**
  start
  int
